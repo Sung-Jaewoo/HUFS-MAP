@@ -467,3 +467,647 @@ button {
     border-width: 5px;
   }
 }
+
+/* Restored layout + HUFS MAP theme */
+.postPage {
+  grid-template-columns: 92px 1fr;
+  background: #f7f8fc;
+  color: #151827;
+  transition: grid-template-columns 0.22s ease;
+}
+
+.postPage.sidebarOpen {
+  grid-template-columns: 184px 1fr;
+}
+
+.sideBar {
+  overflow: hidden;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sideBar.open {
+  background: #fff;
+  border-right: 1px solid #e6e9f2;
+  box-shadow: 12px 0 28px rgba(20, 24, 40, 0.04);
+}
+
+.sideTools {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 34px;
+}
+
+.board {
+  border: 1px solid #e6e9f2;
+  box-shadow: 0 18px 45px rgba(20, 24, 40, 0.06);
+}
+
+.menuButton,
+.sideItem,
+.emptyPosts,
+.postCard p,
+.lengthInfo,
+.compactPostCard p {
+  color: #667085;
+}
+
+.writeButton,
+.detailAuthor span,
+.commentAvatar {
+  background: #eee8ff;
+  color: #6d4df2;
+}
+
+.writeButton {
+  box-shadow: 0 10px 24px rgba(109, 77, 242, 0.12);
+}
+
+.thumbnailButton {
+  width: 100%;
+  display: block;
+  padding: 0;
+  border-radius: 20px;
+}
+
+.thumbnailButton:focus-visible {
+  outline: 3px solid #6d4df2;
+  outline-offset: 4px;
+}
+
+.emptyPosts {
+  min-height: 260px;
+  display: grid;
+  place-items: center;
+  border: 2px dashed #d8deeb;
+  border-radius: 24px;
+  background: #fafbff;
+  font-size: 24px;
+}
+
+.categoryChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.categoryButton,
+.categorySelect,
+.contentInput,
+.commentBox textarea,
+.commentBox,
+.detailCommentForm textarea {
+  border-color: #d8deeb;
+}
+
+.categoryButton {
+  color: #2f3446;
+  box-shadow: 0 3px 10px rgba(20, 24, 40, 0.03);
+}
+
+.categoryButton.selected {
+  background: #f0ebff;
+  border-color: #8063f1;
+  color: #6042de;
+}
+
+.categoryFavoriteButton {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border: 2px solid #d8deeb;
+  border-radius: 9px;
+  background: white;
+  color: #98a2b3;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.categoryFavoriteButton.active {
+  background: #f0ebff;
+  border-color: #8063f1;
+  color: #6d4df2;
+}
+
+.thumbnail,
+.photoUpload {
+  background: #f0eef7;
+}
+
+.shapeCircle,
+.shapeTriangle,
+.shapeSquare,
+.photoUpload::before,
+.photoUpload::after {
+  background: #c8c4d2;
+}
+
+.heartIcon {
+  width: 24px;
+  height: 24px;
+  display: block;
+  flex: 0 0 24px;
+  fill: transparent;
+  stroke: #151827;
+  stroke-width: 2;
+  transition: fill 0.15s ease, stroke 0.15s ease;
+}
+
+.heartButton.liked .heartIcon {
+  fill: #e53935;
+  stroke: #e53935;
+}
+
+.commentIcon,
+.commentIcon::after {
+  background: #151827;
+}
+
+.addButton {
+  position: fixed;
+  right: 54px;
+  bottom: 28px;
+  z-index: 20;
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 6px solid #6d4df2;
+  border-radius: 50%;
+  background: white;
+  color: #6d4df2;
+  font-size: 64px;
+  font-weight: 300;
+  line-height: 1;
+  box-shadow: 0 14px 30px rgba(109, 77, 242, 0.18);
+}
+
+.writePage {
+  min-height: 100%;
+}
+
+.writeHeader {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 34px;
+}
+
+.writeHeader h1 {
+  margin: 0;
+  font-size: 44px;
+  font-weight: 800;
+}
+
+.writeBody {
+  display: grid;
+  grid-template-columns: 300px minmax(280px, 1fr) auto;
+  align-items: start;
+  gap: 56px;
+  margin-bottom: 34px;
+}
+
+.photoUpload {
+  width: 300px;
+  aspect-ratio: 1 / 1;
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 34px;
+  color: #667085;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.photoUpload::before,
+.photoUpload::after {
+  content: "";
+  position: absolute;
+}
+
+.photoUpload::before {
+  width: 26px;
+  height: 178px;
+}
+
+.photoUpload::after {
+  width: 178px;
+  height: 26px;
+}
+
+.photoUpload span {
+  position: relative;
+  z-index: 1;
+  padding: 2px 42px;
+  background: rgba(200, 196, 210, 0.82);
+}
+
+.photoUpload img {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photoUpload input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.writeFields {
+  padding-top: 4px;
+}
+
+.titleInput {
+  width: 100%;
+  border: 0;
+  outline: none;
+  color: #151827;
+  font-size: 32px;
+  font-weight: 500;
+}
+
+.titleInput::placeholder {
+  color: #151827;
+  opacity: 1;
+}
+
+.writeFields p {
+  margin: 12px 0 18px;
+  color: #151827;
+  font-size: 18px;
+}
+
+.contentInput {
+  width: 100%;
+  min-height: 190px;
+  display: block;
+  margin-bottom: 20px;
+  padding: 18px;
+  border: 2px solid #d8deeb;
+  border-radius: 14px;
+  outline: none;
+  resize: vertical;
+  background: #fff;
+  color: #151827;
+  font: inherit;
+  font-size: 20px;
+  line-height: 1.5;
+}
+
+.contentInput::placeholder,
+.commentBox textarea::placeholder,
+.detailCommentForm textarea::placeholder {
+  color: #98a2b3;
+}
+
+.contentInput:focus,
+.commentBox textarea:focus {
+  border-color: #6d4df2;
+  box-shadow: 0 0 0 4px rgba(109, 77, 242, 0.1);
+}
+
+.lengthInfo {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: -8px 0 18px;
+  font-size: 15px;
+}
+
+.lengthInfo strong,
+.lengthInfo.error span {
+  color: #d93025;
+}
+
+.categorySelect {
+  min-width: 220px;
+  height: 44px;
+  padding: 0 14px;
+  border: 2px solid #d8deeb;
+  border-radius: 10px;
+  background: white;
+  color: #2f3446;
+  font: inherit;
+  font-size: 18px;
+}
+
+.submitPostButton {
+  align-self: start;
+  min-width: 118px;
+  height: 56px;
+  padding: 0 22px;
+  border-radius: 28px;
+  background: #6d4df2;
+  color: white;
+  font-size: 20px;
+  font-weight: 700;
+  box-shadow: 0 10px 22px rgba(109, 77, 242, 0.2);
+}
+
+.writePreviewList {
+  width: min(520px, 100%);
+}
+
+.writePreviewList h2,
+.detailRelatedPosts h2 {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 26px;
+  font-size: 34px;
+  font-weight: 800;
+}
+
+.writePreviewList h2 span,
+.detailRelatedPosts h2 span {
+  font-size: 42px;
+  line-height: 1;
+}
+
+.compactPostCard {
+  display: grid;
+  grid-template-columns: 166px 1fr;
+  column-gap: 22px;
+  align-items: start;
+  margin-bottom: 22px;
+}
+
+.compactPostCard .thumbnail {
+  grid-row: span 2;
+  border-radius: 18px;
+}
+
+.compactPostCard .postInfo {
+  margin-top: 0;
+  font-size: 30px;
+}
+
+.compactPostCard p {
+  align-self: end;
+  margin: 0 0 6px;
+  font-size: 17px;
+}
+
+.detailPage {
+  min-height: 100%;
+}
+
+.detailHeader {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 38px;
+}
+
+.detailHeader h1 {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 500;
+}
+
+.detailPost {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 34px;
+  min-height: 270px;
+}
+
+.detailImage .thumbnail {
+  aspect-ratio: 1 / 1;
+  border-radius: 28px;
+}
+
+.detailBody {
+  padding-top: 4px;
+}
+
+.detailBody h2 {
+  margin: 0 0 8px;
+  font-size: 32px;
+  font-weight: 500;
+}
+
+.detailBody > p {
+  margin: 14px 0 0;
+  font-size: 20px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.detailAuthor {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #2f3446;
+  font-size: 20px;
+}
+
+.detailAuthor span {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 14px;
+}
+
+.detailAuthor p {
+  margin: 0;
+}
+
+.detailActions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0 46px;
+  font-size: 22px;
+}
+
+.detailComments {
+  margin: 0 -54px;
+  padding: 20px 24px 0;
+  background: #f7f8fc;
+}
+
+.detailComments h2 {
+  margin: 0 0 14px;
+  font-size: 28px;
+  font-weight: 500;
+}
+
+.detailCommentList {
+  max-height: 190px;
+  overflow-y: auto;
+  display: grid;
+  gap: 12px;
+  padding-right: 8px;
+}
+
+.detailCommentForm {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 108px;
+  gap: 12px;
+  align-items: start;
+  margin-top: 14px;
+}
+
+.detailCommentInputArea {
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.detailCommentForm textarea {
+  width: 100%;
+  height: 64px;
+  min-height: 64px;
+  resize: vertical;
+  padding: 12px;
+  border: 0;
+  border-radius: 8px;
+  outline: none;
+  background: white;
+  font: inherit;
+}
+
+.detailCommentForm button {
+  height: 64px;
+  border-radius: 4px;
+  background: #f0ebff;
+  color: #4f36c8;
+  font-size: 16px;
+}
+
+.commentLengthInfo {
+  min-height: 18px;
+  margin: 0;
+  font-size: 13px;
+}
+
+.detailRelatedPosts {
+  margin: 22px -24px 0;
+  padding: 34px 36px 36px;
+  background: white;
+}
+
+.detailRelatedPosts .compactPostCard {
+  width: min(520px, 100%);
+}
+
+.favoritePage h1 {
+  margin: 0 0 28px;
+  font-size: 44px;
+  font-weight: 800;
+}
+
+.favoriteBuildingList {
+  width: min(720px, 100%);
+  display: grid;
+  gap: 14px;
+}
+
+.favoriteBuildingItem {
+  min-height: 72px;
+  display: grid;
+  grid-template-columns: 40px 1fr 32px;
+  align-items: center;
+  gap: 16px;
+  padding: 0 22px;
+  border: 1px solid #e6e9f2;
+  border-radius: 16px;
+  background: white;
+  color: #151827;
+  text-align: left;
+  box-shadow: 0 8px 22px rgba(20, 24, 40, 0.04);
+}
+
+.favoriteBuildingItem span {
+  color: #6d4df2;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.favoriteBuildingItem span:last-child {
+  justify-self: end;
+  font-size: 30px;
+}
+
+.favoriteBuildingItem strong {
+  font-size: 22px;
+}
+
+@media (max-width: 1100px) {
+  .writeBody {
+    grid-template-columns: 220px 1fr;
+    gap: 30px;
+  }
+
+  .photoUpload {
+    width: 220px;
+  }
+
+  .submitPostButton {
+    grid-column: 2;
+    justify-self: start;
+  }
+}
+
+@media (max-width: 700px) {
+  .postPage.sidebarOpen {
+    grid-template-columns: 124px 1fr;
+  }
+
+  .sideTools {
+    gap: 22px;
+  }
+
+  .categoryFavoriteButton {
+    width: 38px;
+    height: 38px;
+    font-size: 18px;
+  }
+
+  .writeHeader h1 {
+    font-size: 34px;
+  }
+
+  .writeBody {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .photoUpload {
+    width: min(260px, 100%);
+  }
+
+  .titleInput {
+    font-size: 24px;
+  }
+
+  .submitPostButton {
+    grid-column: auto;
+  }
+
+  .writePreviewList h2 {
+    font-size: 24px;
+  }
+
+  .compactPostCard {
+    grid-template-columns: 120px 1fr;
+  }
+
+  .compactPostCard .postInfo {
+    font-size: 22px;
+  }
+}
