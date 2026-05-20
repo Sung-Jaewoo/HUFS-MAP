@@ -3,6 +3,7 @@ import "./Postpage.css";
 
 const text = {
   board: "게시판",
+  write: "글쓰기",
   writePost: "게시글 작성",
   writeTitle: "제목을 입력하세요",
   writeContent: "글을 입력하세요",
@@ -15,6 +16,10 @@ const text = {
   all: "전체",
   favorite: "즐겨찾기",
   likedPosts: "좋아한 게시물",
+  likeLabel: "좋아요",
+  commentLabel: "댓글",
+  reply: "답글달기",
+  replyPlaceholder: "답글을 입력하세요",
   commentTitle: "댓글 달기",
   commentPlaceholder: "댓글을 입력하세요",
   commentSubmit: "등록",
@@ -22,9 +27,17 @@ const text = {
   commentLengthError:
     "댓글은 공백 포함 300자를 넘을 수 없습니다.",
   commentCancel: "취소",
+  delete: "삭제",
+  deletedComment: "삭제된 댓글입니다.",
+  report: "신고하기",
+  reportTitle: "게시물 신고하기",
+  reportHelp: "신고 사유를 선택해주세요.",
+  reportSubmit: "신고하기",
+  reportDone: "신고 완료되었습니다",
   noComments: "아직 댓글이 없습니다.",
   noPosts: "아직 게시글이 없습니다.",
   noFavoriteBuildings: "즐겨찾기한 건물이 없습니다.",
+  noLikedPosts: "좋아요한 게시물이 없습니다.",
   me: "나",
 };
 
@@ -35,7 +48,6 @@ const icons = {
   heart: "♡",
   back: "‹",
   check: "✓",
-  plus: "＋",
   arrow: "→",
 };
 
@@ -50,6 +62,17 @@ const categories = [
   "어문관",
   "교양관",
   "인문경상관",
+];
+
+const reportReasons = [
+  "불법촬영물 등의 유통",
+  "낚시 /놀람/도배",
+  "욕설/비하",
+  "게시판 성격에 부적절함",
+  "정당/정치인 비하 및 선거운동",
+  "유출/사칭/사기",
+  "상업적 광고 및 판매",
+  "음란물/불건전한 만남 및 대화",
 ];
 
 const COMMENT_LIMIT = 300;
@@ -88,7 +111,7 @@ function formatPostDate(createdAt) {
 function Postpage() {
   const [view, setView] = useState("list");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(categories[1]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [posts, setPosts] = useState(initialPosts);
   const [favoriteCategories, setFavoriteCategories] = useState([]);
   const [activeCommentPostId, setActiveCommentPostId] = useState(null);
@@ -97,6 +120,12 @@ function Postpage() {
   const [commentError, setCommentError] = useState("");
   const [detailCommentDraft, setDetailCommentDraft] = useState("");
   const [detailCommentError, setDetailCommentError] = useState("");
+  const [replyTargetId, setReplyTargetId] = useState(null);
+  const [replyDraft, setReplyDraft] = useState("");
+  const [replyError, setReplyError] = useState("");
+  const [isReportOpen, setIsReportOpen] = useState(false);
+  const [reportDraft, setReportDraft] = useState("");
+  const [reportMessage, setReportMessage] = useState("");
   const [postError, setPostError] = useState("");
   const [postDraft, setPostDraft] = useState({
     title: "",
@@ -130,9 +159,15 @@ function Postpage() {
       setCommentError("");
       setDetailCommentDraft("");
       setDetailCommentError("");
+      setReplyTargetId(null);
+      setReplyDraft("");
+      setReplyError("");
+      setIsReportOpen(false);
+      setReportDraft("");
+      setReportMessage("");
       setPostError("");
 
-      if (state.selectedCategory) {
+      if (Object.prototype.hasOwnProperty.call(state, "selectedCategory")) {
         setSelectedCategory(state.selectedCategory);
       }
 
@@ -206,6 +241,9 @@ function Postpage() {
                   id: Date.now(),
                   author: text.me,
                   content: commentDraft.trim(),
+                  likes: 0,
+                  liked: false,
+                  replies: [],
                 },
               ],
             }
@@ -219,9 +257,14 @@ function Postpage() {
 
   const activePost = posts.find((post) => post.id === activeCommentPostId);
   const detailPost = posts.find((post) => post.id === detailPostId);
-  const filteredPosts = posts.filter(
-    (post) => post.category === selectedCategory,
-  );
+  const filteredPosts = posts
+    .filter((post) =>
+      selectedCategory ? post.category === selectedCategory : true,
+    )
+    .sort((firstPost, secondPost) =>
+      new Date(secondPost.createdAt) - new Date(firstPost.createdAt),
+    );
+  const likedPosts = posts.filter((post) => post.liked);
   const recentPosts = posts
     .filter((post) => post.category === postDraft.category)
     .slice(0, 3);
@@ -235,7 +278,7 @@ function Postpage() {
     : [];
 
   const openWritePage = () => {
-    resetPostDraft(selectedCategory);
+    resetPostDraft(selectedCategory || categories[1]);
     setPostError("");
     pushPageState({
       view: "write",
@@ -243,6 +286,18 @@ function Postpage() {
       selectedCategory,
     });
     setView("write");
+    setIsSidebarOpen(false);
+  };
+
+  const openBoardPage = () => {
+    setSelectedCategory(null);
+    pushPageState({
+      view: "list",
+      detailPostId: null,
+      selectedCategory: null,
+    });
+    setView("list");
+    setIsSidebarOpen(false);
   };
 
   const openFavoriteBuildingsPage = () => {
@@ -252,6 +307,16 @@ function Postpage() {
       selectedCategory,
     });
     setView("favorites");
+    setIsSidebarOpen(false);
+  };
+
+  const openLikedPostsPage = () => {
+    pushPageState({
+      view: "likedPosts",
+      detailPostId: null,
+      selectedCategory,
+    });
+    setView("likedPosts");
     setIsSidebarOpen(false);
   };
 
@@ -273,10 +338,22 @@ function Postpage() {
     );
   };
 
+  const toggleSelectedCategory = (category) => {
+    setSelectedCategory((currentCategory) =>
+      currentCategory === category ? null : category,
+    );
+  };
+
   const openDetailPage = (postId) => {
     setDetailPostId(postId);
     setDetailCommentDraft("");
     setDetailCommentError("");
+    setReplyTargetId(null);
+    setReplyDraft("");
+    setReplyError("");
+    setIsReportOpen(false);
+    setReportDraft("");
+    setReportMessage("");
     pushPageState({
       view: "detail",
       detailPostId: postId,
@@ -289,6 +366,12 @@ function Postpage() {
     setDetailPostId(null);
     setDetailCommentDraft("");
     setDetailCommentError("");
+    setReplyTargetId(null);
+    setReplyDraft("");
+    setReplyError("");
+    setIsReportOpen(false);
+    setReportDraft("");
+    setReportMessage("");
     pushPageState({
       view: "list",
       detailPostId: null,
@@ -381,6 +464,9 @@ function Postpage() {
                   id: Date.now(),
                   author: text.me,
                   content: detailCommentDraft.trim(),
+                  likes: 0,
+                  liked: false,
+                  replies: [],
                 },
               ],
             }
@@ -401,6 +487,195 @@ function Postpage() {
     );
   };
 
+  const toggleCommentLike = (commentId) => {
+    setPosts((currentPosts) =>
+      currentPosts.map((post) =>
+        post.id === detailPostId
+          ? {
+              ...post,
+              comments: post.comments.map((comment) =>
+                comment.id === commentId
+                  ? {
+                      ...comment,
+                      liked: !comment.liked,
+                      likes: comment.liked
+                        ? Math.max((comment.likes || 0) - 1, 0)
+                        : (comment.likes || 0) + 1,
+                    }
+                  : comment,
+              ),
+            }
+          : post,
+      ),
+    );
+  };
+
+  const openReplyForm = (commentId) => {
+    setReplyTargetId((currentId) => (currentId === commentId ? null : commentId));
+    setReplyDraft("");
+    setReplyError("");
+  };
+
+  const updateReplyDraft = (value) => {
+    const limitedValue = value.slice(0, COMMENT_LIMIT);
+
+    setReplyDraft(limitedValue);
+    setReplyError(value.length > COMMENT_LIMIT ? text.commentLengthError : "");
+  };
+
+  const submitReply = (event, commentId) => {
+    event.preventDefault();
+
+    if (!replyDraft.trim() || detailPostId === null) return;
+
+    if (replyDraft.length > COMMENT_LIMIT) {
+      setReplyError(text.commentLengthError);
+      return;
+    }
+
+    setPosts((currentPosts) =>
+      currentPosts.map((post) =>
+        post.id === detailPostId
+          ? {
+              ...post,
+              comments: post.comments.map((comment) =>
+                comment.id === commentId
+                  ? {
+                      ...comment,
+                      replies: [
+                        ...(comment.replies || []),
+                        {
+                          id: Date.now(),
+                          author: text.me,
+                          content: replyDraft.trim(),
+                          likes: 0,
+                          liked: false,
+                          deleted: false,
+                        },
+                      ],
+                    }
+                  : comment,
+              ),
+            }
+          : post,
+      ),
+    );
+
+    setReplyTargetId(null);
+    setReplyDraft("");
+    setReplyError("");
+  };
+
+  const deleteComment = (commentId) => {
+    setPosts((currentPosts) =>
+      currentPosts.map((post) =>
+        post.id === detailPostId
+          ? {
+              ...post,
+              comments: post.comments.map((comment) =>
+                comment.id === commentId
+                  ? {
+                      ...comment,
+                      deleted: true,
+                      liked: false,
+                      likes: 0,
+                    }
+                  : comment,
+              ),
+            }
+          : post,
+      ),
+    );
+  };
+
+  const deleteReply = (commentId, replyId) => {
+    setPosts((currentPosts) =>
+      currentPosts.map((post) =>
+        post.id === detailPostId
+          ? {
+              ...post,
+              comments: post.comments.map((comment) =>
+                comment.id === commentId
+                  ? {
+                      ...comment,
+                      replies: (comment.replies || []).map((reply) =>
+                        reply.id === replyId
+                          ? {
+                              ...reply,
+                              deleted: true,
+                              liked: false,
+                              likes: 0,
+                            }
+                          : reply,
+                      ),
+                    }
+                  : comment,
+              ),
+            }
+          : post,
+      ),
+    );
+  };
+
+  const toggleReplyLike = (commentId, replyId) => {
+    setPosts((currentPosts) =>
+      currentPosts.map((post) =>
+        post.id === detailPostId
+          ? {
+              ...post,
+              comments: post.comments.map((comment) =>
+                comment.id === commentId
+                  ? {
+                      ...comment,
+                      replies: (comment.replies || []).map((reply) =>
+                        reply.id === replyId
+                          ? {
+                              ...reply,
+                              liked: !reply.liked,
+                              likes: reply.liked
+                                ? Math.max((reply.likes || 0) - 1, 0)
+                                : (reply.likes || 0) + 1,
+                            }
+                          : reply,
+                      ),
+                    }
+                  : comment,
+              ),
+            }
+          : post,
+      ),
+    );
+  };
+
+  const openReportPopup = () => {
+    setReportDraft("");
+    setReportMessage("");
+    setIsReportOpen(true);
+  };
+
+  const closeReportPopup = () => {
+    setIsReportOpen(false);
+    setReportDraft("");
+    setReportMessage("");
+  };
+
+  const submitReport = (event) => {
+    event.preventDefault();
+
+    if (!reportDraft) {
+      setReportMessage(text.reportHelp);
+      return;
+    }
+
+    setReportDraft("");
+    setReportMessage(text.reportDone);
+
+    window.setTimeout(() => {
+      setIsReportOpen(false);
+      setReportMessage("");
+    }, 2500);
+  };
+
   return (
     <div className={isSidebarOpen ? "postPage sidebarOpen" : "postPage"}>
       <aside className={isSidebarOpen ? "sideBar open" : "sideBar"}>
@@ -414,8 +689,22 @@ function Postpage() {
 
         {isSidebarOpen && (
           <div className="sideTools">
-            <button className="writeButton" type="button" onClick={openWritePage}>
-              {icons.write}
+            <button
+              className="writeButton sideWriteItem"
+              type="button"
+              onClick={openWritePage}
+            >
+              <span>{icons.write}</span>
+              <p>{text.write}</p>
+            </button>
+
+            <button
+              className="sideItem"
+              type="button"
+              onClick={openBoardPage}
+            >
+              <StackedPostsIcon />
+              <p>{text.all}</p>
             </button>
 
             <button
@@ -427,7 +716,11 @@ function Postpage() {
               <p>{text.favorite}</p>
             </button>
 
-            <button className="sideItem" type="button">
+            <button
+              className="sideItem"
+              type="button"
+              onClick={openLikedPostsPage}
+            >
               <span>{icons.heart}</span>
               <p>{text.likedPosts}</p>
             </button>
@@ -454,14 +747,31 @@ function Postpage() {
             onBack={closeDetailPage}
             onCommentChange={updateDetailCommentDraft}
             onCommentSubmit={submitDetailComment}
+            onCommentLike={toggleCommentLike}
+            onCommentDelete={deleteComment}
             onLike={toggleLike}
+            onReportOpen={openReportPopup}
+            onReplyChange={updateReplyDraft}
+            onReplyDelete={deleteReply}
+            onReplyLike={toggleReplyLike}
+            onReplyOpen={openReplyForm}
+            onReplySubmit={submitReply}
             post={detailPost}
             relatedPosts={detailRelatedPosts}
+            replyDraft={replyDraft}
+            replyError={replyError}
+            replyTargetId={replyTargetId}
           />
         ) : view === "favorites" ? (
           <FavoriteBuildingsView
             favoriteCategories={favoriteCategories}
             onSelectCategory={openCategoryFromFavorites}
+          />
+        ) : view === "likedPosts" ? (
+          <LikedPostsView
+            likedPosts={likedPosts}
+            onLike={toggleLike}
+            onOpenDetail={openDetailPage}
           />
         ) : (
           <>
@@ -478,7 +788,7 @@ function Postpage() {
                         selectedCategory === category ? "selected" : ""
                       }`}
                       type="button"
-                      onClick={() => setSelectedCategory(category)}
+                      onClick={() => toggleSelectedCategory(category)}
                     >
                       {selectedCategory === category && <span>{icons.check}</span>}
                       {category}
@@ -491,7 +801,7 @@ function Postpage() {
                       onClick={() => toggleFavoriteCategory(category)}
                       aria-label={`${category} 즐겨찾기`}
                     >
-                      {icons.star}
+                      {isFavorite ? "★" : icons.star}
                     </button>
                   </div>
                 );
@@ -513,9 +823,6 @@ function Postpage() {
               <div className="emptyPosts">{text.noPosts}</div>
             )}
 
-            <button className="addButton" type="button" onClick={openWritePage}>
-              {icons.plus}
-            </button>
           </>
         )}
 
@@ -573,6 +880,59 @@ function Postpage() {
             </form>
           </div>
         )}
+
+        {isReportOpen && (
+          <div className="commentOverlay" onClick={closeReportPopup}>
+            <form
+              className="reportBox"
+              onClick={(event) => event.stopPropagation()}
+              onSubmit={submitReport}
+            >
+              {reportMessage === text.reportDone ? (
+                <div className="reportCompleteContent">
+                  <FlagIcon />
+                  <strong>{text.reportDone}</strong>
+                </div>
+              ) : (
+                <>
+                  <div className="reportBoxHeader">
+                    <FlagIcon />
+                    <strong>{text.reportTitle}</strong>
+                  </div>
+
+                  <p className="reportHelp">{text.reportHelp}</p>
+
+                  <div className="reportReasonList">
+                    {reportReasons.map((reason) => (
+                      <button
+                        className={
+                          reportDraft === reason
+                            ? "reportReasonButton selected"
+                            : "reportReasonButton"
+                        }
+                        type="button"
+                        key={reason}
+                        onClick={() => setReportDraft(reason)}
+                      >
+                        {reportDraft === reason && <span>{icons.check}</span>}
+                        {reason}
+                      </button>
+                    ))}
+                  </div>
+
+                  {reportMessage && <p className="reportMessage">{reportMessage}</p>}
+
+                  <div className="commentBoxActions">
+                    <button type="button" onClick={closeReportPopup}>
+                      {text.commentCancel}
+                    </button>
+                    <button type="submit">{text.reportSubmit}</button>
+                  </div>
+                </>
+              )}
+            </form>
+          </div>
+        )}
       </main>
     </div>
   );
@@ -600,6 +960,29 @@ function FavoriteBuildingsView({ favoriteCategories, onSelectCategory }) {
         </div>
       ) : (
         <div className="emptyPosts">{text.noFavoriteBuildings}</div>
+      )}
+    </section>
+  );
+}
+
+function LikedPostsView({ likedPosts, onLike, onOpenDetail }) {
+  return (
+    <section className="likedPostsPage">
+      <h1>{text.likedPosts}</h1>
+
+      {likedPosts.length > 0 ? (
+        <section className="postGrid">
+          {likedPosts.map((post) => (
+            <PostCard
+              key={post.id}
+              post={post}
+              onLike={onLike}
+              onOpenDetail={onOpenDetail}
+            />
+          ))}
+        </section>
+      ) : (
+        <div className="emptyPosts">{text.noLikedPosts}</div>
       )}
     </section>
   );
@@ -655,11 +1038,22 @@ function PostCard({
 function DetailPostView({
   commentDraft,
   commentError,
+  onCommentDelete,
+  onCommentLike,
   onCommentChange,
   onCommentSubmit,
   onLike,
+  onReportOpen,
+  onReplyChange,
+  onReplyDelete,
+  onReplyLike,
+  onReplyOpen,
+  onReplySubmit,
   post,
   relatedPosts,
+  replyDraft,
+  replyError,
+  replyTargetId,
 }) {
   return (
     <section className="detailPage">
@@ -693,12 +1087,18 @@ function DetailPostView({
           onClick={() => onLike(post.id)}
         >
           <HeartIcon />
+          <span>{text.likeLabel}</span>
           {post.likes}
         </button>
         <span className="statItem">
           <span className="commentIcon" />
+          <span>{text.commentLabel}</span>
           {post.comments.length}
         </span>
+        <button className="reportButton" type="button" onClick={onReportOpen}>
+          <FlagIcon />
+          <span>{text.report}</span>
+        </button>
       </div>
 
       <section className="detailComments">
@@ -711,10 +1111,126 @@ function DetailPostView({
           {post.comments.length > 0 ? (
             post.comments.map((comment) => (
               <div className="commentItem" key={comment.id}>
-                <div className="commentAvatar">{comment.author.slice(0, 1)}</div>
+                <div className="commentAvatar">
+                  {comment.deleted ? "-" : comment.author.slice(0, 1)}
+                </div>
                 <div className="commentText">
-                  <strong>{comment.author}</strong>
-                  <p>{comment.content}</p>
+                  {comment.deleted ? (
+                    <>
+                      <strong className="deletedAuthor">(삭제)</strong>
+                      <p className="deletedCommentText">{text.deletedComment}</p>
+                    </>
+                  ) : (
+                    <>
+                      <strong>{comment.author}</strong>
+                      <p>{comment.content}</p>
+
+                      <div className="commentActions">
+                        <button
+                          className={
+                            comment.liked
+                              ? "commentLikeButton liked"
+                              : "commentLikeButton"
+                          }
+                          type="button"
+                          onClick={() => onCommentLike(comment.id)}
+                        >
+                          <HeartIcon />
+                          {text.likeLabel} {comment.likes || 0}
+                        </button>
+                        <button type="button" onClick={() => onReplyOpen(comment.id)}>
+                          <span className="commentIcon miniCommentIcon" />
+                          {text.reply}
+                        </button>
+                        <button type="button" onClick={onReportOpen}>
+                          <FlagIcon />
+                          {text.report}
+                        </button>
+                        <button type="button" onClick={() => onCommentDelete(comment.id)}>
+                          {text.delete}
+                        </button>
+                      </div>
+                    </>
+                  )}
+
+                  {(comment.replies || []).length > 0 && (
+                    <div className="replyList">
+                      {(comment.replies || []).map((reply) => (
+                        <div className="replyItem" key={reply.id}>
+                          <div className="commentAvatar">
+                            {reply.deleted ? "-" : reply.author.slice(0, 1)}
+                          </div>
+                          <div className="commentText">
+                            {reply.deleted ? (
+                              <>
+                                <strong className="deletedAuthor">(삭제)</strong>
+                                <p className="deletedCommentText">
+                                  {text.deletedComment}
+                                </p>
+                              </>
+                            ) : (
+                              <>
+                                <strong>{reply.author}</strong>
+                                <p>{reply.content}</p>
+                                <div className="commentActions">
+                                  <button
+                                    className={
+                                      reply.liked
+                                        ? "commentLikeButton liked"
+                                        : "commentLikeButton"
+                                    }
+                                    type="button"
+                                    onClick={() =>
+                                      onReplyLike(comment.id, reply.id)
+                                    }
+                                  >
+                                    <HeartIcon />
+                                    {text.likeLabel} {reply.likes || 0}
+                                  </button>
+                                  <button type="button" onClick={onReportOpen}>
+                                    <FlagIcon />
+                                    {text.report}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      onReplyDelete(comment.id, reply.id)
+                                    }
+                                  >
+                                    {text.delete}
+                                  </button>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {!comment.deleted && replyTargetId === comment.id && (
+                    <form
+                      className="replyForm"
+                      onSubmit={(event) => onReplySubmit(event, comment.id)}
+                    >
+                      <textarea
+                        value={replyDraft}
+                        onChange={(event) => onReplyChange(event.target.value)}
+                        placeholder={text.replyPlaceholder}
+                      />
+                      <div
+                        className={
+                          replyError
+                            ? "lengthInfo commentLengthInfo error"
+                            : "lengthInfo commentLengthInfo"
+                        }
+                      >
+                        <span>{replyDraft.length}/{COMMENT_LIMIT}</span>
+                        {replyError && <strong>{replyError}</strong>}
+                      </div>
+                      <button type="submit">{text.commentSubmit}</button>
+                    </form>
+                  )}
                 </div>
               </div>
             ))
@@ -901,6 +1417,38 @@ function HeartIcon() {
       focusable="false"
     >
       <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.08C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+    </svg>
+  );
+}
+
+function FlagIcon() {
+  return (
+    <svg
+      className="flagIcon"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M5 21V4" />
+      <path d="M5 5.5c4.3-2.4 7.1 1.9 11.5.2 1-.4 1.8-.9 2.5-1.5v10.4c-.8.7-1.8 1.2-3 1.5-4.1 1-6.9-2.9-11 .1" />
+    </svg>
+  );
+}
+
+function StackedPostsIcon() {
+  return (
+    <svg
+      className="sideSvgIcon"
+      viewBox="0 0 32 32"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M12 4h13a3 3 0 0 1 3 3v17" />
+      <path d="M8 8h13a3 3 0 0 1 3 3v17" />
+      <rect x="4" y="12" width="17" height="16" rx="3" />
+      <path d="M8 16h9" />
+      <path d="M8 19.5h9" />
+      <path d="M8 23h9" />
     </svg>
   );
 }
