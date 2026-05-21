@@ -1,0 +1,151 @@
+.mypage-layout {
+  display: flex;
+  min-height: calc(100vh - 44px);
+}
+
+.mypage-sidebar {
+  width: 260px;
+  padding: 42px 24px;
+  background: white;
+  border-right: 1px solid #e5e7eb;
+}
+
+.side-profile {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 36px;
+}
+
+.side-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #eef4ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+}
+
+.side-profile strong {
+  font-size: 16px;
+}
+
+.side-profile span {
+  margin-left: 8px;
+  color: #3478f6;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.side-profile p {
+  margin: 5px 0;
+  color: #4b5563;
+  font-size: 12px;
+}
+
+.side-menu {
+  width: 100% !important;
+  height: 46px;
+  margin: 0 0 18px !important;
+  padding: 0 18px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #4b5563;
+  text-align: left;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.side-menu.active {
+  background: #efe8ff;
+  color: #704ce8;
+}
+
+.edit-main {
+  flex: 1;
+  padding: 48px 32px;
+}
+
+.edit-main h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.edit-main > p {
+  margin: 10px 0 36px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.edit-card {
+  padding: 28px 32px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.edit-row {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  align-items: center;
+  margin-bottom: 22px;
+}
+
+.edit-row label {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.edit-row input {
+  width: 100%;
+  height: 46px;
+  padding: 0 18px;
+  border: 1px solid #d9dce5;
+  border-radius: 8px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.edit-row.password {
+  align-items: start;
+}
+
+.edit-row.password input {
+  margin-bottom: 14px;
+}
+
+.edit-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-top: 34px;
+}
+
+.cancel-btn,
+.save-btn {
+  width: 110px !important;
+  height: 44px;
+  margin: 0 !important;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cancel-btn {
+  background: #f0f1f5;
+  color: #4b5563;
+}
+
+.save-btn {
+  background: #704ce8;
+  color: white;
+}

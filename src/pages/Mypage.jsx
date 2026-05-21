@@ -1,13 +1,14 @@
+import { Link } from 'react-router-dom'
 import './MyPage.css'
 
 function MyPage() {
   return (
     <div className="mypage">
       <header className="top-nav">
-        <a href="#">캠퍼스맵</a>
-        <a href="#">게시판</a>
-        <a href="#">마이페이지</a>
-        <a href="#">로그인</a>
+        <Link to="#">캠퍼스맵</Link>
+        <Link to="#">게시판</Link>
+        <Link to="/mypage">마이페이지</Link>
+        <Link to="/">로그인</Link>
       </header>
 
       <main className="mypage-main">
@@ -27,32 +28,42 @@ function MyPage() {
             </div>
 
             <p>컴퓨터공학과</p>
-
             <p>honggildong@ooo.ac.kr</p>
           </div>
 
-          <button className="edit-btn">
-            ✎ 정보 수정
-          </button>
+          <Link to="/mypage/edit">
+            <button className="edit-btn">
+              ✎ 정보 수정
+            </button>
+          </Link>
         </section>
 
         <section className="card-grid">
-          <div className="menu-card">
-            <div className="icon blue">✎</div>
 
-            <div className="card-text">
-              <h3>내가 쓴 글</h3>
+          {/* 내가 쓴 글 */}
+          <Link
+            to="/mypage/posts"
+            className="menu-link"
+          >
+            <div className="menu-card">
+              <div className="icon blue">✎</div>
 
-              <p>
-                내가 작성한 게시글을
-                <br />
-                확인해보세요.
-              </p>
+              <div className="card-text">
+                <h3>내가 쓴 글</h3>
+
+                <p>
+                  내가 작성한 게시글을
+                  <br />
+                  확인해보세요.
+                </p>
+              </div>
+
+              <b>›</b>
             </div>
+          </Link>
 
-            <b>›</b>
-          </div>
-
+          <Link to="/mypage/comments" className="menu-link">
+          {/* 내가 쓴 댓글 */}
           <div className="menu-card">
             <div className="icon purple">💬</div>
 
@@ -68,9 +79,10 @@ function MyPage() {
 
             <b>›</b>
           </div>
+          </Link>
         </section>
 
-        <section className="menu-card wide">
+        <section className="menu-card wide">  
           <div className="icon green">☆</div>
 
           <div className="card-text">
