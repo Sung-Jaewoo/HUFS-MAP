@@ -58,10 +58,7 @@ function SignupPage() {
       newErrors.passwordCheck = '비밀번호가 일치하지 않습니다.'
     }
 
-    if (
-      form.nickname.length < 2 ||
-      form.nickname.length > 12
-    ) {
+    if (form.nickname.length < 2 || form.nickname.length > 12) {
       newErrors.nickname =
         '닉네임은 2자 이상 12자 이하로 입력해주세요.'
     }
@@ -81,13 +78,12 @@ function SignupPage() {
 
   return (
     <div className="signup-page">
-      <aside className="sidebar">
-        <div className="menu">☰</div>
-        <div className="nav active">✎</div>
-        <div className="nav">◎</div>
-        <div className="nav">♧</div>
-        <div className="nav">?</div>
-      </aside>
+      <header className="top-nav">
+        <Link to="#">캠퍼스맵</Link>
+        <Link to="#">게시판</Link>
+        <Link to="/mypage">마이페이지</Link>
+        <Link to="/">로그인</Link>
+      </header>
 
       <main className="signup-main">
         <div className="circle left"></div>
@@ -125,16 +121,11 @@ function SignupPage() {
                 />
 
                 {errors.email && (
-                  <p className="field-error">
-                    {errors.email}
-                  </p>
+                  <p className="field-error">{errors.email}</p>
                 )}
               </div>
 
-              <button
-                type="button"
-                className="signup-small-btn"
-              >
+              <button type="button" className="signup-small-btn">
                 전송
               </button>
             </div>
@@ -153,16 +144,11 @@ function SignupPage() {
                 />
 
                 {errors.code && (
-                  <p className="field-error">
-                    {errors.code}
-                  </p>
+                  <p className="field-error">{errors.code}</p>
                 )}
               </div>
 
-              <button
-                type="button"
-                className="signup-small-btn"
-              >
+              <button type="button" className="signup-small-btn">
                 확인
               </button>
             </div>
@@ -181,9 +167,7 @@ function SignupPage() {
                 />
 
                 {errors.userId && (
-                  <p className="field-error">
-                    {errors.userId}
-                  </p>
+                  <p className="field-error">{errors.userId}</p>
                 )}
               </div>
             </div>
@@ -202,9 +186,7 @@ function SignupPage() {
                 />
 
                 {errors.password && (
-                  <p className="field-error">
-                    {errors.password}
-                  </p>
+                  <p className="field-error">{errors.password}</p>
                 )}
               </div>
             </div>
@@ -214,9 +196,7 @@ function SignupPage() {
 
               <div className="signup-field">
                 <input
-                  className={
-                    errors.passwordCheck ? 'error-input' : ''
-                  }
+                  className={errors.passwordCheck ? 'error-input' : ''}
                   name="passwordCheck"
                   type="password"
                   placeholder="비밀번호를 다시 입력하세요"
@@ -246,9 +226,7 @@ function SignupPage() {
                 />
 
                 {errors.nickname && (
-                  <p className="field-error">
-                    {errors.nickname}
-                  </p>
+                  <p className="field-error">{errors.nickname}</p>
                 )}
               </div>
             </div>
