@@ -1,6 +1,6 @@
-import { Link } from 'react-router-dom' 
-import './LoginPage.css'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import './LoginPage.css'
 
 function LoginPage() {
   const [error, setError] = useState(false)
@@ -10,7 +10,6 @@ function LoginPage() {
   const handleLogin = (e) => {
     e.preventDefault()
 
-    // 테스트 로그인 조건
     if (id === 'testuser' && password === '1234') {
       setError(false)
       alert('로그인 성공!')
@@ -21,13 +20,12 @@ function LoginPage() {
 
   return (
     <div className="login-page">
-      <aside className="sidebar">
-        <div className="menu">☰</div>
-        <div className="nav active">✎</div>
-        <div className="nav">◎</div>
-        <div className="nav">♧</div>
-        <div className="nav">?</div>
-      </aside>
+      <header className="top-nav">
+        <Link to="#">캠퍼스맵</Link>
+        <Link to="#">게시판</Link>
+        <Link to="/mypage">마이페이지</Link>
+        <Link to="/">로그인</Link>
+      </header>
 
       <main className="login-main">
         <div className="circle left"></div>
@@ -92,11 +90,14 @@ function LoginPage() {
               <a href="#">비밀번호를 잊으셨나요?</a>
             </div>
 
-            <button type="submit">로그인</button>
+            <button type="submit" className="login-btn">
+              로그인
+            </button>
           </form>
 
           <p className="signup">
-            계정이 없으신가요? <Link to="/signup">회원가입</Link>
+            계정이 없으신가요?{' '}
+            <Link to="/signup">회원가입</Link>
           </p>
         </section>
       </main>
