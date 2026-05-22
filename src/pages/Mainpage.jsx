@@ -45,7 +45,7 @@ function Mainpage({ onOpenBoard }) {
 
         <section className="heroPanel">
           <div className="heroCopy">
-            <p>한국외국어대학교 글로벌캠퍼스 맵</p>
+            <p>한국외국어대학교 글로벌캠퍼스 맵로그</p>
             <h1>
               한눈에 보는
               <span>우리 학교</span>
@@ -117,17 +117,16 @@ function CampusIllustration() {
   return (
     <div className="campusArt" aria-hidden="true">
       <svg viewBox="0 0 520 190" role="img">
-        <g className="cloud cloudOne">
+        <g className="cloud">
           <ellipse cx="72" cy="34" rx="22" ry="12" />
           <ellipse cx="94" cy="29" rx="18" ry="16" />
           <ellipse cx="116" cy="36" rx="24" ry="10" />
         </g>
-        <g className="cloud cloudTwo">
+        <g className="cloud">
           <ellipse cx="328" cy="16" rx="21" ry="12" />
           <ellipse cx="350" cy="10" rx="18" ry="16" />
           <ellipse cx="375" cy="19" rx="27" ry="10" />
         </g>
-
         <g className="trees">
           <Tree x="36" y="120" />
           <Tree x="75" y="103" />
@@ -135,7 +134,6 @@ function CampusIllustration() {
           <Tree x="365" y="106" />
           <Tree x="486" y="111" />
         </g>
-
         <g className="mainBuilding">
           <path d="M184 73h102l20 27v72H164v-72z" />
           <path className="roof" d="M164 100l71-56 71 56z" />
@@ -149,7 +147,6 @@ function CampusIllustration() {
           <rect x="280" y="116" width="13" height="18" rx="2" />
           <rect x="246" y="105" width="13" height="18" rx="2" />
         </g>
-
         <g className="sideBuilding">
           <rect x="342" y="101" width="130" height="71" rx="3" />
           <rect x="332" y="90" width="150" height="13" rx="3" />
@@ -160,7 +157,6 @@ function CampusIllustration() {
           <rect x="392" y="147" width="18" height="18" rx="2" />
           <rect x="424" y="147" width="18" height="18" rx="2" />
         </g>
-
         <path className="pin" d="M428 46c0-13 10-23 23-23s23 10 23 23c0 18-23 43-23 43s-23-25-23-43z" />
         <circle className="pinHole" cx="451" cy="46" r="8" />
         <path className="ground" d="M18 173h482" />
