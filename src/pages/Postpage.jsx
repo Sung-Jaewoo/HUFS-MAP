@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import "./Postpage.css";
 
 const text = {
+  home: "홈",
+  homeTitle: "HUFS MAP",
+  homeSubtitle: "캠퍼스 게시판과 건물 정보를 한 곳에서 확인하세요.",
   board: "게시판",
   write: "글쓰기",
   writePost: "게시글 작성",
@@ -190,6 +193,16 @@ function Postpage() {
     setSelectedCategory(null);
     pushPageState({ view: "list", detailPostId: null, selectedCategory: null });
     setView("list");
+    setIsSidebarOpen(false);
+  };
+
+  const openHomePage = () => {
+    pushPageState({
+      view: "home",
+      detailPostId: null,
+      selectedCategory,
+    });
+    setView("home");
     setIsSidebarOpen(false);
   };
 
@@ -553,6 +566,10 @@ function Postpage() {
     }, 2500);
   };
 
+  if (view === "home") {
+    return <div className="blankHomePage" />;
+  }
+
   return (
     <div className={isSidebarOpen ? "postPage sidebarOpen" : "postPage"}>
       <aside className={isSidebarOpen ? "sideBar open" : "sideBar"}>
@@ -566,6 +583,11 @@ function Postpage() {
 
         {isSidebarOpen && (
           <div className="sideTools">
+            <button className="sideItem" type="button" onClick={openHomePage}>
+              <HomeIcon />
+              <p>{text.home}</p>
+            </button>
+
             <button
               className="writeButton sideWriteItem"
               type="button"
@@ -1265,6 +1287,21 @@ function StackedPostsIcon() {
       <path d="M8 16h9" />
       <path d="M8 19.5h9" />
       <path d="M8 23h9" />
+    </svg>
+  );
+}
+
+function HomeIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="sideSvgIcon"
+      focusable="false"
+      viewBox="0 0 32 32"
+    >
+      <path d="M5 15.5 16 6l11 9.5" />
+      <path d="M9 14.5V27h14V14.5" />
+      <path d="M13 27v-8h6v8" />
     </svg>
   );
 }

@@ -237,6 +237,12 @@ button {
   font-size: 24px;
 }
 
+.blankHomePage {
+  width: 100vw;
+  height: 100vh;
+  background: #fff;
+}
+
 .postCard {
   min-width: 0;
 }
