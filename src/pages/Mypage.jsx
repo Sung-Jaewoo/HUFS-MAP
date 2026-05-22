@@ -82,21 +82,23 @@ function MyPage() {
           </Link>
         </section>
 
-        <section className="menu-card wide">  
-          <div className="icon green">☆</div>
+        <Link to="/mypage/favorites" className="menu-link">
+          <section className="menu-card wide">
+            <div className="icon green">☆</div>
 
-          <div className="card-text">
-            <h3>즐겨찾기</h3>
+            <div className="card-text">
+              <h3>즐겨찾기</h3>
 
-            <p>
-              즐겨찾기한 건물과 장소를
-              <br />
-              한눈에 확인해보세요.
-            </p>
-          </div>
+              <p>
+                즐겨찾기한 건물과 장소를
+                <br />
+                한눈에 확인해보세요.
+              </p>
+            </div>
 
-          <b>›</b>
-        </section>
+            <b>›</b>
+          </section>
+        </Link>
 
         <section className="bottom-grid">
           <div className="small-card">
