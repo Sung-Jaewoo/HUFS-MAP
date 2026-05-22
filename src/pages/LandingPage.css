@@ -1,0 +1,200 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f6f7fb;
+  font-family: Pretendard, sans-serif;
+}
+
+.landing-page {
+  min-height: 100vh;
+}
+
+/* 네비게이션 */
+
+.landing-nav {
+  height: 72px;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 60px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.logo {
+  color: #4f46e5;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.landing-nav nav {
+  display: flex;
+  gap: 42px;
+}
+
+.landing-nav nav a {
+  text-decoration: none;
+  color: #111827;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* 메인 배너 */
+
+.hero-section {
+  margin: 28px auto;
+  width: 92%;
+  background: #eef3ff;
+  border-radius: 24px;
+  padding: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hero-text span {
+  color: #4f46e5;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.hero-text h1 {
+  margin: 16px 0;
+  font-size: 58px;
+  line-height: 1.2;
+}
+
+.hero-text h1 strong {
+  color: #2563eb;
+}
+
+.hero-text p {
+  color: #4b5563;
+  line-height: 1.7;
+  margin-bottom: 30px;
+}
+
+.hero-text button {
+  width: 180px;
+  height: 54px;
+  border: none;
+  border-radius: 12px;
+  background: #2563eb;
+  color: white;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.hero-image {
+  font-size: 220px;
+}
+
+/* 메뉴 */
+
+.menu-section {
+  width: 92%;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+}
+
+.menu-box {
+  background: white;
+  border-radius: 18px;
+  padding: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.menu-box h3 {
+  margin: 0 0 10px;
+}
+
+.menu-box p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.menu-box span {
+  font-size: 24px;
+  color: #6b7280;
+}
+
+.icon {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+}
+
+.blue {
+  background: #dbeafe;
+}
+
+.purple {
+  background: #ede9fe;
+}
+
+.green {
+  background: #dcfce7;
+}
+
+/* 지도 */
+
+.map-preview {
+  width: 92%;
+  height: 320px;
+  margin: 28px auto;
+  border-radius: 24px;
+  background:
+    url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=1400&auto=format&fit=crop')
+    center/cover;
+  position: relative;
+}
+
+.map-card {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  width: 260px;
+  background: white;
+  border-radius: 18px;
+  padding: 24px;
+}
+
+.map-card h3 {
+  margin-top: 0;
+}
+
+.map-card p {
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+/* 푸터 */
+
+.landing-footer {
+  height: 80px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 30px;
+  padding-right: 60px;
+}
+
+.landing-footer a {
+  text-decoration: none;
+  color: #4b5563;
+  font-size: 14px;
+}
