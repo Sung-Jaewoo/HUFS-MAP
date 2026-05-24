@@ -116,6 +116,9 @@ function LandingPage() {
 
       {/* 지도 미리보기 */}
       <section className="map-preview">
+        <div className="pin pin1"></div>
+        <div className="pin pin2"></div>
+        <div className="pin pin3"></div>
         <div className="map-card">
           <h3>캠퍼스 지도 미리보기</h3>
 
