@@ -63,16 +63,67 @@ function App() {
     );
   }
 
+  if (page === "login") {
+    return <PendingPage title="로그인/회원가입" onOpenHome={() => navigateTo("main")} />;
+  }
+
+  if (page === "mypage") {
+    return <PendingPage title="마이페이지" onOpenHome={() => navigateTo("main")} />;
+  }
+
   return (
     <Mainpage
       page={page}
       selectedBuildingName={selectedBuildingName}
       onOpenBoard={() => navigateTo("post")}
       onOpenBuildings={() => navigateTo("buildings")}
+      onOpenFacilities={() => navigateTo("facilities")}
       onOpenHome={() => navigateTo("main")}
+      onOpenLogin={() => navigateTo("login")}
       onOpenMap={(buildingName) => navigateTo("map", { buildingName })}
+      onOpenMyPage={() => navigateTo("mypage")}
       onOpenCampusMap={() => navigateTo("campusMap")}
     />
+  );
+}
+
+function PendingPage({ title, onOpenHome }) {
+  return (
+    <main
+      style={{
+        minHeight: "100vh",
+        display: "grid",
+        placeItems: "center",
+        background: "#f7f8fc",
+        color: "#151827",
+        fontFamily:
+          'Pretendard, "Noto Sans KR", Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+      }}
+    >
+      <section style={{ textAlign: "center" }}>
+        <h1 style={{ margin: 0, fontSize: 40, fontWeight: 900 }}>{title}</h1>
+        <p style={{ margin: "16px 0 28px", color: "#697083", fontSize: 18 }}>
+          해당 페이지는 다른 브랜치 머지 후 연결됩니다.
+        </p>
+        <button
+          onClick={onOpenHome}
+          style={{
+            height: 44,
+            padding: "0 20px",
+            border: 0,
+            borderRadius: 999,
+            background: "#5b63ff",
+            color: "#ffffff",
+            font: "inherit",
+            fontWeight: 800,
+            cursor: "pointer",
+          }}
+          type="button"
+        >
+          메인으로
+        </button>
+      </section>
+    </main>
   );
 }
 

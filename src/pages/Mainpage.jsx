@@ -1,6 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import L from "leaflet";
-import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
+import { MapContainer, Marker, Popup, TileLayer, ZoomControl, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "./Mainpage.css";
 
@@ -114,15 +114,196 @@ const buildings = [
   },
 ];
 
+const facilities = [
+  {
+    name: "매점",
+    tag: "인문경상관 1층",
+    description: "09:00 ~ 17:40 · (구내) 4468\n과자, 음료 등 먹거리 판매\n문구류 판매",
+    image: "/buildings/kyungsangdae.jpeg",
+  },
+  {
+    name: "어문학관 매점",
+    tag: "어문학관 1층",
+    description: "09:00 ~ 17:40 · (구내) 4561\n시중과 동일한 상품판매\n문구류 및 승차권 판매",
+    image: "/buildings/a-moon.jpeg",
+  },
+  {
+    name: "어문학관 학생식당",
+    tag: "어문학관 1층",
+    description: "10:00 ~ 16:30 · (구내) 4481\n일품류, 양식류 등 다양한 메뉴\n각종 모임 및 행사 지원",
+    image: "/buildings/a-moon.jpeg",
+  },
+  {
+    name: "어문학관 분식코너",
+    tag: "어문학관 1층",
+    description: "09:00 ~ 17:40\n라면, 우동 등 분식류",
+    image: "/buildings/a-moon.jpeg",
+  },
+  {
+    name: "APPLE BEAN",
+    tag: "어문학관 1층",
+    description: "09:00 ~ 17:30\n커피, 주스, 아이스크림",
+    image: "/buildings/a-moon.jpeg",
+  },
+  {
+    name: "복사실",
+    tag: "어문학관 2층 로비",
+    description: "09:00 ~ 18:00 · (구내) 4197\n스캔, 복사, 제본 등",
+    image: "/buildings/a-moon.jpeg",
+  },
+  {
+    name: "교양관 매점/휴게실",
+    tag: "교양관 1층",
+    description: "09:00 ~ 17:40 · (구내) 4199\n과자, 음료 등 먹거리 판매\n휴게실 PC 및 복사기, 무대시설",
+    image: "/buildings/gyoyang.jpeg",
+  },
+  {
+    name: "여랑",
+    tag: "교양관 1층",
+    description: "09:00 ~ 17:30 · (구내) 4160\n여학생 전용 휴게공간",
+    image: "/buildings/gyoyang.jpeg",
+  },
+  {
+    name: "후생관 학생식당",
+    tag: "후생관 1층",
+    description: "10:30 ~ 18:30 · (구내) 4822\n한식, 일품, 양식, 분식 등\n다양한 메뉴와 넓은 공간",
+    image: "/buildings/husaeng.jpeg",
+  },
+  {
+    name: "후생관 분식코너",
+    tag: "후생관 1층",
+    description: "10:30 ~ 18:30\n라면, 떡볶이 등 분식류",
+    image: "/buildings/husaeng.jpeg",
+  },
+  {
+    name: "편의점(이마트24)",
+    tag: "후생관 1층",
+    description: "09:00 ~ 21:00 · (구내) 4823\n주말운영 토 09:00 ~ 16:00\n과자, 음료 등 먹거리 판매",
+    image: "/buildings/husaeng.jpeg",
+  },
+  {
+    name: "교직원식당",
+    tag: "후생관 2층",
+    description: "11:30 ~ 13:40, 17:30 ~ 18:30\n(구내) 4827\n깔끔하고 정갈한 메뉴의 구빈식당 공간",
+    image: "/buildings/husaeng.jpeg",
+  },
+  {
+    name: "COOP-SNACK",
+    tag: "후생관 2층",
+    description: "08:40 ~ 09:30, 10:30 ~ 14:30\n(구내) 4890\n조식 제공, 김밥, 죽, 기타 브런치 메뉴",
+    image: "/buildings/husaeng.jpeg",
+  },
+  {
+    name: "생협 사무국",
+    tag: "후생관",
+    description: "09:00 ~ 18:30 · (구내) 4192\n조합원 가입, 학대출력 포스터\n학내 복지매장 관리",
+    image: "/buildings/husaeng.jpeg",
+  },
+  {
+    name: "생협 학생위원회",
+    tag: "후생관",
+    description: "09:00 ~ 17:30 · (구내) 4153\n생협 행사 참여 신청, 양심우산 및 돗자리 대여\n식당 모니터링 등 참여사업",
+    image: "/buildings/husaeng.jpeg",
+  },
+  {
+    name: "문구점",
+    tag: "후생관 3층",
+    description: "09:00 ~ 18:20 · (구내) 4812\n각종 문구류 및 생필품\n승차권 판매",
+    image: "/buildings/husaeng.jpeg",
+  },
+  {
+    name: "서점",
+    tag: "후생관 3층",
+    description: "09:00 ~ 19:00 · (구내) 4821\n서적, 강의교재 판매",
+    image: "/buildings/husaeng.jpeg",
+  },
+  {
+    name: "외대 안경원",
+    tag: "후생관 3층",
+    description: "09:00 ~ 18:00 · (구내) 4814\n안경, 렌즈",
+    image: "/buildings/husaeng.jpeg",
+  },
+  {
+    name: "컴퓨터점",
+    tag: "후생관 3층",
+    description: "09:00 ~ 18:00 · (구내) 4830\n컴퓨터 수리 및 소모품 판매",
+    image: "/buildings/husaeng.jpeg",
+  },
+  {
+    name: "그라찌에(북카페)",
+    tag: "후생관 3층",
+    description: "09:00 ~ 20:00 · (구내) 4969\n카페, 음료, 베이커리, 세미나룸",
+    image: "/buildings/husaeng.jpeg",
+  },
+  {
+    name: "맘스터치",
+    tag: "후생관 3층",
+    description: "10:30 ~ 18:30 · (구내) 4944\n수제버거, 치킨, 음료 판매",
+    image: "/buildings/husaeng.jpeg",
+  },
+  {
+    name: "경기대원고속",
+    tag: "승차장 1층",
+    description: "031) 333-8158\n좌석버스 운영 업무",
+    image: "/buildings/100nyeon.jpeg",
+  },
+  {
+    name: "던킨도넛",
+    tag: "백년관 본관 1층",
+    description: "커피, 도넛 등",
+    image: "/buildings/100nyeon.jpeg",
+  },
+  {
+    name: "매점휴게실",
+    tag: "백년관 본관 3층",
+    description: "09:00 ~ 17:40 · (구내) 4196\n과자, 음료 등 먹거리 판매\n승차권 판매",
+    image: "/buildings/100nyeon.jpeg",
+  },
+  {
+    name: "자연과학관 매점휴게실",
+    tag: "자연과학관 1층",
+    description: "09:00 ~ 17:00 · (구내) 4166\n과자, 음료 등 먹거리 판매",
+    image: "/buildings/jayeon.jpeg",
+  },
+];
+
+const facilityGroups = facilities.reduce((groups, facility) => {
+  const buildingName = facility.tag.split(" ")[0];
+  const currentGroup = groups.find((group) => group.building === buildingName);
+
+  if (currentGroup) {
+    currentGroup.items.push(facility);
+  } else {
+    groups.push({ building: buildingName, items: [facility] });
+  }
+
+  return groups;
+}, []);
+
+const facilityBuildingMap = {
+  어문학관: "어문관",
+  "백년관": "백년관",
+  "백년관(본관)": "백년관",
+  승차장: "백년관",
+};
+
+function getBuildingNameForFacilityGroup(groupName) {
+  return facilityBuildingMap[groupName] || groupName;
+}
+
 function Mainpage({
   page,
   selectedBuildingName,
   onOpenBoard,
   onOpenBuildings,
+  onOpenFacilities,
   onOpenHome,
+  onOpenLogin,
   onOpenMap,
+  onOpenMyPage,
   onOpenCampusMap,
 }) {
+  const [footerModal, setFooterModal] = useState(null);
   const selectedBuilding =
     buildings.find((building) => building.name === selectedBuildingName) ||
     buildings[0];
@@ -134,6 +315,8 @@ function Mainpage({
         onOpenBoard={onOpenBoard}
         onOpenBuildings={onOpenBuildings}
         onOpenCampusMap={onOpenCampusMap}
+        onOpenLogin={onOpenLogin}
+        onOpenMyPage={onOpenMyPage}
       />
     );
   }
@@ -161,12 +344,12 @@ function Mainpage({
           <button className="navLink navButtonLink" onClick={onOpenBoard} type="button">
             게시판
           </button>
-          <a href="#" className="navLink">
+          <button className="navLink navButtonLink" onClick={onOpenMyPage} type="button">
             마이페이지
-          </a>
-          <a href="#" className="navLink">
+          </button>
+          <button className="navLink navButtonLink" onClick={onOpenLogin} type="button">
             로그인/회원가입
-          </a>
+          </button>
         </header>
 
         <section className="buildingPageContent">
@@ -205,6 +388,73 @@ function Mainpage({
     );
   }
 
+  if (page === "facilities") {
+    return (
+      <main className="mainPage buildingListPage">
+        <header className="topNav buildingTopNav">
+          <button
+            className="navLink navButtonLink"
+            onClick={onOpenCampusMap}
+            type="button"
+          >
+            캠퍼스맵
+          </button>
+          <button className="navLink navButtonLink" onClick={onOpenBoard} type="button">
+            게시판
+          </button>
+          <button className="navLink navButtonLink" onClick={onOpenMyPage} type="button">
+            마이페이지
+          </button>
+          <button className="navLink navButtonLink" onClick={onOpenLogin} type="button">
+            로그인/회원가입
+          </button>
+        </header>
+
+        <section className="buildingPageContent">
+          <div className="buildingHeader">
+            <div>
+              <p>편의시설</p>
+              <h1>편의시설 목록</h1>
+            </div>
+            <button type="button" onClick={onOpenHome}>
+              메인으로
+            </button>
+          </div>
+
+          <div className="facilityGroupGrid">
+            {facilityGroups.map((group) => (
+              <article className="facilityGroupCard" key={group.building}>
+                <div className="facilityGroupHeader">
+                  <h2>{group.building}</h2>
+                  <span>{group.items.length}개 시설</span>
+                </div>
+                <div className="facilityList">
+                  {group.items.map((facility) => (
+                    <section className="facilityItem" key={facility.name}>
+                      <div>
+                        <strong>{facility.name}</strong>
+                        <span>{facility.tag.replace(group.building, "").trim() || "교내"}</span>
+                      </div>
+                      <p>{facility.description}</p>
+                    </section>
+                  ))}
+                </div>
+                <button
+                  className="facilityMapButton"
+                  type="button"
+                  onClick={() => onOpenMap(getBuildingNameForFacilityGroup(group.building))}
+                >
+                  지도에서 보기
+                  <ArrowIcon />
+                </button>
+              </article>
+            ))}
+          </div>
+        </section>
+      </main>
+    );
+  }
+
   return (
     <main className="mainPage">
       <div className="appFrame">
@@ -219,17 +469,17 @@ function Mainpage({
           <button className="navLink navButtonLink" onClick={onOpenBoard} type="button">
             게시판
           </button>
-          <a href="#" className="navLink">
+          <button className="navLink navButtonLink" onClick={onOpenMyPage} type="button">
             마이페이지
-          </a>
-          <a href="#" className="navLink">
+          </button>
+          <button className="navLink navButtonLink" onClick={onOpenLogin} type="button">
             로그인/회원가입
-          </a>
+          </button>
         </header>
 
         <section className="heroPanel">
           <div className="heroCopy">
-            <p>OO대학교 캠퍼스 맵</p>
+            <p>한국외국어대학교 글로벌캠퍼스 맵</p>
             <h1>
               한눈에 보는
               <span>우리 학교</span>
@@ -239,10 +489,6 @@ function Mainpage({
               <br />
               필요한 정보를 편리하게 이용해보세요.
             </strong>
-            <button type="button">
-              지도로 시작하기
-              <ArrowIcon />
-            </button>
           </div>
 
           <CampusIllustration />
@@ -258,7 +504,9 @@ function Mainpage({
                   ? onOpenBoard
                   : menu.icon === "search"
                     ? onOpenBuildings
-                    : undefined
+                    : menu.icon === "facility"
+                      ? onOpenFacilities
+                      : undefined
               }
               type="button"
             >
@@ -292,14 +540,78 @@ function Mainpage({
         </section>
 
         <footer className="footerLinks">
-          <a href="#">이용약관</a>
+          <button type="button" onClick={() => setFooterModal("terms")}>
+            이용약관
+          </button>
           <span />
-          <a href="#">개인정보처리방침</a>
+          <button type="button" onClick={() => setFooterModal("privacy")}>
+            개인정보처리방침
+          </button>
           <span />
-          <a href="#">문의하기</a>
+          <button type="button" onClick={() => setFooterModal("contact")}>
+            문의하기
+          </button>
         </footer>
       </div>
+
+      {footerModal && (
+        <FooterModal type={footerModal} onClose={() => setFooterModal(null)} />
+      )}
     </main>
+  );
+}
+
+const footerModalContent = {
+  terms: {
+    title: "이용약관",
+    body: [
+      "본 서비스는 캠퍼스 건물 위치와 편의 정보를 제공하기 위한 목적으로 운영됩니다.",
+      "사용자는 제공되는 정보를 개인적인 캠퍼스 이용 목적으로 사용할 수 있습니다.",
+      "지도 및 건물 정보는 실제 현장 상황과 차이가 있을 수 있으며, 중요한 이동 전에는 학교 공지를 함께 확인해 주세요.",
+    ],
+  },
+  privacy: {
+    title: "개인정보처리방침",
+    body: [
+      "현재 서비스는 별도의 회원 개인정보를 저장하지 않는 화면 구성 단계입니다.",
+      "추후 로그인 기능이 머지되면 수집 항목, 보관 기간, 이용 목적을 명확히 안내합니다.",
+      "개인정보 관련 문의는 서비스 관리자에게 요청할 수 있습니다.",
+    ],
+  },
+  contact: {
+    title: "문의하기",
+    body: [
+      "서비스 이용 중 오류나 건물 정보 수정 요청이 있으면 관리자에게 문의해 주세요.",
+      "문의 이메일: hufs-map@example.com",
+      "지도 좌표, 건물명, 화면 캡처를 함께 보내주시면 더 빠르게 확인할 수 있습니다.",
+    ],
+  },
+};
+
+function FooterModal({ type, onClose }) {
+  const content = footerModalContent[type];
+
+  return (
+    <div className="footerModalOverlay" onClick={onClose} role="presentation">
+      <section
+        aria-modal="true"
+        className="footerModal"
+        onClick={(event) => event.stopPropagation()}
+        role="dialog"
+      >
+        <div className="footerModalHeader">
+          <h2>{content.title}</h2>
+          <button aria-label="닫기" onClick={onClose} type="button">
+            ×
+          </button>
+        </div>
+        <div className="footerModalBody">
+          {content.body.map((paragraph) => (
+            <p key={paragraph}>{paragraph}</p>
+          ))}
+        </div>
+      </section>
+    </div>
   );
 }
 
@@ -360,6 +672,8 @@ function MapPage({
   onOpenBoard,
   onOpenBuildings,
   onOpenCampusMap,
+  onOpenLogin,
+  onOpenMyPage,
 }) {
   return (
     <main className="mainPage campusMapPage">
@@ -370,12 +684,12 @@ function MapPage({
         <button className="navLink navButtonLink" onClick={onOpenBoard} type="button">
           게시판
         </button>
-        <a href="#" className="navLink">
+        <button className="navLink navButtonLink" onClick={onOpenMyPage} type="button">
           마이페이지
-        </a>
-        <a href="#" className="navLink">
+        </button>
+        <button className="navLink navButtonLink" onClick={onOpenLogin} type="button">
           로그인/회원가입
-        </a>
+        </button>
       </header>
 
       <section className="campusMapContent">
@@ -455,6 +769,7 @@ function FullCampusMapPage({ onOpenBuildings, onOpenHome }) {
         zoom={16}
         zoomControl={false}
       >
+        <ZoomControl position="bottomright" />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
