@@ -280,6 +280,12 @@ const facilityGroups = facilities.reduce((groups, facility) => {
   return groups;
 }, []);
 
+const leftFacilityBuildings = ["인문경상관", "교양관", "승차장", "백년관", "자연과학관"];
+const facilityGroupColumns = [
+  facilityGroups.filter((group) => leftFacilityBuildings.includes(group.building)),
+  facilityGroups.filter((group) => !leftFacilityBuildings.includes(group.building)),
+];
+
 const facilityBuildingMap = {
   어문학관: "어문관",
   "백년관": "백년관",
@@ -422,32 +428,36 @@ function Mainpage({
           </div>
 
           <div className="facilityGroupGrid">
-            {facilityGroups.map((group) => (
-              <article className="facilityGroupCard" key={group.building}>
-                <div className="facilityGroupHeader">
-                  <h2>{group.building}</h2>
-                  <span>{group.items.length}개 시설</span>
-                </div>
-                <div className="facilityList">
-                  {group.items.map((facility) => (
-                    <section className="facilityItem" key={facility.name}>
-                      <div>
-                        <strong>{facility.name}</strong>
-                        <span>{facility.tag.replace(group.building, "").trim() || "교내"}</span>
-                      </div>
-                      <p>{facility.description}</p>
-                    </section>
-                  ))}
-                </div>
-                <button
-                  className="facilityMapButton"
-                  type="button"
-                  onClick={() => onOpenMap(getBuildingNameForFacilityGroup(group.building))}
-                >
-                  지도에서 보기
-                  <ArrowIcon />
-                </button>
-              </article>
+            {facilityGroupColumns.map((column, columnIndex) => (
+              <div className="facilityColumn" key={`facility-column-${columnIndex}`}>
+                {column.map((group) => (
+                  <article className="facilityGroupCard" key={group.building}>
+                    <div className="facilityGroupHeader">
+                      <h2>{group.building}</h2>
+                      <span>{group.items.length}개 시설</span>
+                    </div>
+                    <div className="facilityList">
+                      {group.items.map((facility) => (
+                        <section className="facilityItem" key={facility.name}>
+                          <div>
+                            <strong>{facility.name}</strong>
+                            <span>{facility.tag.replace(group.building, "").trim() || "교내"}</span>
+                          </div>
+                          <p>{facility.description}</p>
+                        </section>
+                      ))}
+                    </div>
+                    <button
+                      className="facilityMapButton"
+                      type="button"
+                      onClick={() => onOpenMap(getBuildingNameForFacilityGroup(group.building))}
+                    >
+                      지도에서 보기
+                      <ArrowIcon />
+                    </button>
+                  </article>
+                ))}
+              </div>
             ))}
           </div>
         </section>
