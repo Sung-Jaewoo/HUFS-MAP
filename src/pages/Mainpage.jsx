@@ -1,4 +1,24 @@
+import { useEffect } from "react";
+import L from "leaflet";
+import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 import "./Mainpage.css";
+
+const campusCenter = [37.3379, 127.2688];
+const markerIcon = L.divIcon({
+  className: "leafletBuildingMarker",
+  html: '<svg viewBox="0 0 32 44" aria-hidden="true"><path d="M16 43S3 27.8 3 16A13 13 0 0 1 29 16c0 11.8-13 27-13 27Z"/><circle cx="16" cy="16" r="5.5"/></svg>',
+  iconSize: [32, 44],
+  iconAnchor: [16, 43],
+  popupAnchor: [0, -40],
+});
+const selectedMarkerIcon = L.divIcon({
+  className: "leafletBuildingMarker selected",
+  html: '<svg viewBox="0 0 40 54" aria-hidden="true"><path d="M20 53S4 34.7 4 20a16 16 0 0 1 32 0c0 14.7-16 33-16 33Z"/><circle cx="20" cy="20" r="7"/></svg>',
+  iconSize: [40, 54],
+  iconAnchor: [20, 53],
+  popupAnchor: [0, -50],
+});
 
 const quickMenus = [
   {
@@ -21,17 +41,181 @@ const quickMenus = [
   },
 ];
 
-function Mainpage({ onOpenBoard }) {
+const buildings = [
+  {
+    name: "공학관",
+    tag: "공학 · 실험",
+    description: "공학계열 강의실과\n실험실을 갖춘\n공학 교육의 중심 공간",
+    image: "/buildings/gonghak.jpeg",
+    position: [37.3375961, 127.2677859],
+  },
+  {
+    name: "자연과학관",
+    tag: "자연과학",
+    description: "자연과학 계열 강의와\n연구 활동을 지원하는\n학습 중심 공간",
+    image: "/buildings/jayeon.jpeg",
+    position: [37.3389181, 127.2661526],
+  },
+  {
+    name: "백년관",
+    tag: "학생지원",
+    description: "학생회 및 학생활동 지원 공간,\n다목적 홀을 갖춘\n학생 중심 공간",
+    image: "/buildings/100nyeon.jpeg",
+    position: [37.3373761, 127.2656101],
+  },
+  {
+    name: "기숙사",
+    tag: "생활관",
+    description: "학생들의 안정적인 생활과\n편리한 캠퍼스 생활을\n지원하는 주거 공간",
+    image: "/buildings/hufsdorm.jpeg",
+    position: [37.33495, 127.26315],
+  },
+  {
+    name: "교양관",
+    tag: "교양",
+    description: "다양한 교양 수업과\n학습 활동이 이루어지는\n기초 교육 공간",
+    image: "/buildings/gyoyang.jpeg",
+    position: [37.3397956, 127.2721503],
+  },
+  {
+    name: "어문관",
+    tag: "어문",
+    description: "어문계열 강의와 연구를\n지원하는 글로벌캠퍼스의\n주요 교육 공간",
+    image: "/buildings/a-moon.jpeg",
+    position: [37.3382059, 127.2732724],
+  },
+  {
+    name: "후생관",
+    tag: "편의시설",
+    description: "식당과 편의시설 등\n학생 생활에 필요한\n서비스를 제공하는 공간",
+    image: "/buildings/husaeng.jpeg",
+    position: [37.3377368, 127.2686096],
+  },
+  {
+    name: "중앙도서관",
+    tag: "도서관",
+    description: "학술정보와 다양한 자료를\n제공하는 글로벌캠퍼스의\n중앙 도서관",
+    image: "/buildings/hufslib.jpeg",
+    position: [37.3366946, 127.2685176],
+  },
+  {
+    name: "학생회관",
+    tag: "학생지원",
+    description: "학생 복지 및 다양한\n학생 지원 프로그램을\n제공하는 공간",
+    image: "/buildings/hakgwan.jpeg",
+    position: [37.3372949, 127.2698539],
+  },
+  {
+    name: "인문경상관",
+    tag: "인문 · 경상",
+    description: "인문사회 및 경상계열\n강의와 학습을 지원하는\n교육 공간",
+    image: "/buildings/kyungsangdae.jpeg",
+    position: [37.3397409, 127.2745354],
+  },
+];
+
+function Mainpage({
+  page,
+  selectedBuildingName,
+  onOpenBoard,
+  onOpenBuildings,
+  onOpenHome,
+  onOpenMap,
+  onOpenCampusMap,
+}) {
+  const selectedBuilding =
+    buildings.find((building) => building.name === selectedBuildingName) ||
+    buildings[0];
+
+  if (page === "map") {
+    return (
+      <MapPage
+        building={selectedBuilding}
+        onOpenBoard={onOpenBoard}
+        onOpenBuildings={onOpenBuildings}
+        onOpenCampusMap={onOpenCampusMap}
+      />
+    );
+  }
+
+  if (page === "campusMap") {
+    return (
+      <FullCampusMapPage
+        onOpenBuildings={onOpenBuildings}
+        onOpenHome={onOpenHome}
+      />
+    );
+  }
+
+  if (page === "buildings") {
+    return (
+      <main className="mainPage buildingListPage">
+        <header className="topNav buildingTopNav">
+          <button
+            className="navLink navButtonLink"
+            onClick={onOpenCampusMap}
+            type="button"
+          >
+            캠퍼스맵
+          </button>
+          <button className="navLink navButtonLink" onClick={onOpenBoard} type="button">
+            게시판
+          </button>
+          <a href="#" className="navLink">
+            마이페이지
+          </a>
+          <a href="#" className="navLink">
+            로그인/회원가입
+          </a>
+        </header>
+
+        <section className="buildingPageContent">
+          <div className="buildingHeader">
+            <div>
+              <p>건물 찾기</p>
+              <h1>건물 목록</h1>
+            </div>
+            <button type="button" onClick={onOpenHome}>
+              메인으로
+            </button>
+          </div>
+
+          <div className="buildingGrid">
+            {buildings.map((building) => (
+              <article className="buildingCard" key={building.name}>
+                <div className="buildingImage">
+                  <img alt={`${building.name} 건물 사진`} src={building.image} />
+                </div>
+                <div className="buildingInfo">
+                  <div className="buildingTitleRow">
+                    <h2>{building.name}</h2>
+                  </div>
+                  <span>{building.tag}</span>
+                  <p>{building.description}</p>
+                  <button type="button" onClick={() => onOpenMap(building.name)}>
+                    지도에서 보기
+                    <ArrowIcon />
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      </main>
+    );
+  }
+
   return (
     <main className="mainPage">
       <div className="appFrame">
         <header className="topNav">
-          <a href="#" className="navLink">
+          <button
+            className="navLink navButtonLink"
+            onClick={onOpenCampusMap}
+            type="button"
+          >
             캠퍼스맵
-          </a>
-          <a href="#" className="navLink">
-            건물찾기
-          </a>
+          </button>
           <button className="navLink navButtonLink" onClick={onOpenBoard} type="button">
             게시판
           </button>
@@ -45,7 +229,7 @@ function Mainpage({ onOpenBoard }) {
 
         <section className="heroPanel">
           <div className="heroCopy">
-            <p>한국외국어대학교 글로벌캠퍼스 맵로그</p>
+            <p>OO대학교 캠퍼스 맵</p>
             <h1>
               한눈에 보는
               <span>우리 학교</span>
@@ -69,7 +253,13 @@ function Mainpage({ onOpenBoard }) {
             <button
               className="quickMenuCard"
               key={menu.title}
-              onClick={menu.icon === "board" ? onOpenBoard : undefined}
+              onClick={
+                menu.icon === "board"
+                  ? onOpenBoard
+                  : menu.icon === "search"
+                    ? onOpenBuildings
+                    : undefined
+              }
               type="button"
             >
               <span className={`quickIcon ${menu.iconClass}`}>
@@ -88,7 +278,7 @@ function Mainpage({ onOpenBoard }) {
 
         <section className="mapPreview">
           <MapPattern />
-          <button className="mapPreviewCard" type="button">
+          <button className="mapPreviewCard" onClick={onOpenCampusMap} type="button">
             <MapIcon />
             <span>
               <strong>캠퍼스 지도 미리보기</strong>
@@ -163,6 +353,134 @@ function CampusIllustration() {
       </svg>
     </div>
   );
+}
+
+function MapPage({
+  building,
+  onOpenBoard,
+  onOpenBuildings,
+  onOpenCampusMap,
+}) {
+  return (
+    <main className="mainPage campusMapPage">
+      <header className="topNav buildingTopNav">
+        <button className="navLink navButtonLink" onClick={onOpenCampusMap} type="button">
+          캠퍼스맵
+        </button>
+        <button className="navLink navButtonLink" onClick={onOpenBoard} type="button">
+          게시판
+        </button>
+        <a href="#" className="navLink">
+          마이페이지
+        </a>
+        <a href="#" className="navLink">
+          로그인/회원가입
+        </a>
+      </header>
+
+      <section className="campusMapContent">
+        <div className="mapPageHeader">
+          <div>
+            <p>캠퍼스 지도</p>
+            <h1>{building.name}</h1>
+          </div>
+          <button type="button" onClick={onOpenBuildings}>
+            건물 목록
+          </button>
+        </div>
+
+        <div className="campusMapShell">
+          <div className="largeCampusMap">
+            <MapContainer
+              center={building.position || campusCenter}
+              className="leafletCampusMap"
+              scrollWheelZoom
+              zoom={17}
+            >
+              <MapFocus position={building.position || campusCenter} />
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              {buildings.map((mapBuilding) => (
+                <Marker
+                  icon={
+                    mapBuilding.name === building.name
+                      ? selectedMarkerIcon
+                      : markerIcon
+                  }
+                  key={mapBuilding.name}
+                  position={mapBuilding.position}
+                >
+                  <Popup>
+                    <strong>{mapBuilding.name}</strong>
+                    <br />
+                    {mapBuilding.tag}
+                  </Popup>
+                </Marker>
+              ))}
+            </MapContainer>
+          </div>
+
+          <aside className="mapBuildingPanel">
+            <img alt={`${building.name} 건물 사진`} src={building.image} />
+            <div>
+              <strong>{building.name}</strong>
+              <span>{building.tag}</span>
+              <p>{building.description}</p>
+            </div>
+          </aside>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+function FullCampusMapPage({ onOpenBuildings, onOpenHome }) {
+  return (
+    <main className="mainPage fullCampusMapPage">
+      <div className="fullMapControls">
+        <button type="button" onClick={onOpenHome}>
+          메인으로
+        </button>
+        <button type="button" onClick={onOpenBuildings}>
+          건물 목록
+        </button>
+      </div>
+
+      <MapContainer
+        center={campusCenter}
+        className="fullLeafletMap"
+        scrollWheelZoom
+        zoom={16}
+        zoomControl={false}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        {buildings.map((building) => (
+          <Marker icon={markerIcon} key={building.name} position={building.position}>
+            <Popup>
+              <strong>{building.name}</strong>
+              <br />
+              {building.tag}
+            </Popup>
+          </Marker>
+        ))}
+      </MapContainer>
+    </main>
+  );
+}
+
+function MapFocus({ position }) {
+  const map = useMap();
+
+  useEffect(() => {
+    map.setView(position, 17, { animate: true });
+  }, [map, position]);
+
+  return null;
 }
 
 function Tree({ x, y }) {
