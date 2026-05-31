@@ -1,45 +1,68 @@
-import { useEffect, useState } from "react";
+import { BrowserRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+
 import Mainpage from "./pages/Mainpage.jsx";
 import Postpage from "./pages/Postpage.jsx";
+import LoginPage from "./pages/LoginPage.jsx";
+import SignupPage from "./pages/SignupPage.jsx";
+import MyPage from "./pages/Mypage.jsx";
+import EditProfilePage from "./pages/EditProfilePage.jsx";
+import MyPostsPage from "./pages/MyPostsPage.jsx";
+import CommentPage from "./pages/CommentPage.jsx";
+import FavoritePage from "./pages/FavoritePage.jsx";
 
-function getPageFromHistoryState(state) {
-  if (state?.appPage) return state.appPage;
-  if (state?.view) return "post";
-  return "main";
-}
+const MAIN_PAGE_BY_PATH = {
+  "/": "main",
+  "/buildings": "buildings",
+  "/facilities": "facilities",
+  "/map": "map",
+  "/campus-map": "campusMap",
+};
 
 function App() {
-  const [page, setPage] = useState("main");
-  const [selectedBuildingName, setSelectedBuildingName] = useState("");
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<MainExperience />} />
+        <Route path="/buildings" element={<MainExperience />} />
+        <Route path="/facilities" element={<MainExperience />} />
+        <Route path="/map" element={<MainExperience />} />
+        <Route path="/campus-map" element={<MainExperience />} />
+        <Route path="/post" element={<PostExperience />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/mypage" element={<MyPage />} />
+        <Route path="/mypage/edit" element={<EditProfilePage />} />
+        <Route path="/mypage/posts" element={<MyPostsPage />} />
+        <Route path="/mypage/comments" element={<CommentPage />} />
+        <Route path="/mypage/favorites" element={<FavoritePage />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
 
-  useEffect(() => {
-    const currentState = window.history.state;
-    const currentPage = getPageFromHistoryState(currentState);
+function MainExperience() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const page = MAIN_PAGE_BY_PATH[location.pathname] || "main";
 
-    setPage(currentPage);
-    setSelectedBuildingName(currentState?.buildingName || "");
+  return (
+    <Mainpage
+      page={page}
+      selectedBuildingName={location.state?.buildingName || ""}
+      onOpenBoard={() => navigate("/post")}
+      onOpenBuildings={() => navigate("/buildings")}
+      onOpenFacilities={() => navigate("/facilities")}
+      onOpenHome={() => navigate("/")}
+      onOpenLogin={() => navigate("/login")}
+      onOpenMap={(buildingName) => navigate("/map", { state: { buildingName } })}
+      onOpenMyPage={() => navigate("/mypage")}
+      onOpenCampusMap={() => navigate("/campus-map")}
+    />
+  );
+}
 
-    if (!window.history.state?.appPage && !window.history.state?.view) {
-      window.history.replaceState({ appPage: currentPage }, "");
-    }
-
-    const handlePopState = (event) => {
-      setPage(getPageFromHistoryState(event.state));
-      setSelectedBuildingName(event.state?.buildingName || "");
-    };
-
-    window.addEventListener("popstate", handlePopState);
-
-    return () => {
-      window.removeEventListener("popstate", handlePopState);
-    };
-  }, []);
-
-  const navigateTo = (nextPage, extraState = {}) => {
-    window.history.pushState({ appPage: nextPage, ...extraState }, "");
-    setPage(nextPage);
-    setSelectedBuildingName(extraState.buildingName || "");
-  };
+function PostExperience() {
+  const navigate = useNavigate();
 
   const openMainFromPostSidebar = (event) => {
     const sideItem = event.target.closest(".sideTools .sideItem");
@@ -51,79 +74,14 @@ function App() {
     if (sideItem === firstSideItem) {
       event.preventDefault();
       event.stopPropagation();
-      navigateTo("main");
+      navigate("/");
     }
   };
 
-  if (page === "post") {
-    return (
-      <div onClickCapture={openMainFromPostSidebar}>
-        <Postpage />
-      </div>
-    );
-  }
-
-  if (page === "login") {
-    return <PendingPage title="로그인/회원가입" onOpenHome={() => navigateTo("main")} />;
-  }
-
-  if (page === "mypage") {
-    return <PendingPage title="마이페이지" onOpenHome={() => navigateTo("main")} />;
-  }
-
   return (
-    <Mainpage
-      page={page}
-      selectedBuildingName={selectedBuildingName}
-      onOpenBoard={() => navigateTo("post")}
-      onOpenBuildings={() => navigateTo("buildings")}
-      onOpenFacilities={() => navigateTo("facilities")}
-      onOpenHome={() => navigateTo("main")}
-      onOpenLogin={() => navigateTo("login")}
-      onOpenMap={(buildingName) => navigateTo("map", { buildingName })}
-      onOpenMyPage={() => navigateTo("mypage")}
-      onOpenCampusMap={() => navigateTo("campusMap")}
-    />
-  );
-}
-
-function PendingPage({ title, onOpenHome }) {
-  return (
-    <main
-      style={{
-        minHeight: "100vh",
-        display: "grid",
-        placeItems: "center",
-        background: "#f7f8fc",
-        color: "#151827",
-        fontFamily:
-          'Pretendard, "Noto Sans KR", Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-      }}
-    >
-      <section style={{ textAlign: "center" }}>
-        <h1 style={{ margin: 0, fontSize: 40, fontWeight: 900 }}>{title}</h1>
-        <p style={{ margin: "16px 0 28px", color: "#697083", fontSize: 18 }}>
-          해당 페이지는 다른 브랜치 머지 후 연결됩니다.
-        </p>
-        <button
-          onClick={onOpenHome}
-          style={{
-            height: 44,
-            padding: "0 20px",
-            border: 0,
-            borderRadius: 999,
-            background: "#5b63ff",
-            color: "#ffffff",
-            font: "inherit",
-            fontWeight: 800,
-            cursor: "pointer",
-          }}
-          type="button"
-        >
-          메인으로
-        </button>
-      </section>
-    </main>
+    <div onClickCapture={openMainFromPostSidebar}>
+      <Postpage />
+    </div>
   );
 }
 
