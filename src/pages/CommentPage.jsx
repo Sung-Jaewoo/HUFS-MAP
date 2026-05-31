@@ -147,7 +147,7 @@ function CommentPage() {
 function Header() {
   return (
     <header className="top-nav">
-      <Link to="/">캠퍼스맵</Link>
+      <Link to="/">메인페이지</Link>
       <Link to="/post">게시판</Link>
       <Link to="/mypage">마이페이지</Link>
       <Link to="/">로그아웃</Link>

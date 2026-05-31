@@ -106,6 +106,15 @@ function FavoritePage() {
             {filteredFavorites.length > 0 ? (
               filteredFavorites.map((favorite) => (
                 <article className="favorite-card" key={favorite.id}>
+                  <button
+                    aria-label={`${favorite.name} 즐겨찾기 해제`}
+                    className="favorite-star-button"
+                    onClick={() => removeFavorite(favorite.id)}
+                    title="즐겨찾기 해제"
+                    type="button"
+                  >
+                    ★
+                  </button>
                   <img alt={`${favorite.name} 이미지`} src={favorite.image} />
 
                   <div className="favorite-info">
@@ -143,7 +152,7 @@ function FavoritePage() {
 function Header() {
   return (
     <header className="top-nav">
-      <Link to="/">캠퍼스맵</Link>
+      <Link to="/">메인페이지</Link>
       <Link to="/post">게시판</Link>
       <Link to="/mypage">마이페이지</Link>
       <Link to="/">로그아웃</Link>
