@@ -22,7 +22,7 @@
 }
 
 .favorite-card::after {
-  content: '★';
+  content: "★";
   position: absolute;
   top: 18px;
   right: 18px;
@@ -71,6 +71,12 @@
   word-break: keep-all;
 }
 
+.favorite-actions {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
 .favorite-info button {
   width: auto !important;
   height: auto;
@@ -82,6 +88,14 @@
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
+}
+
+.favorite-info .danger-action {
+  color: #dc2626;
+}
+
+.favorite-grid .empty-state {
+  grid-column: 1 / -1;
 }
 
 @media (max-width: 1200px) {
