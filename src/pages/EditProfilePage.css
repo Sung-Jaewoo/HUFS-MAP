@@ -57,6 +57,10 @@
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
 }
 
 .side-menu.active {
@@ -116,6 +120,22 @@
 
 .edit-row.password input {
   margin-bottom: 14px;
+}
+
+.helper-text {
+  margin: -4px 0 0;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.status-message {
+  margin: 10px 0 0;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: #f4f0ff;
+  color: #5b35d5;
+  font-size: 14px;
+  font-weight: 700;
 }
 
 .edit-buttons {

@@ -1,0 +1,1097 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Pretendard, "Noto Sans KR", Inter, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #ffffff;
+  color: #111111;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.mainPage {
+  width: 100vw;
+  height: 100vh;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.mainPage.buildingListPage {
+  height: 100vh;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.mainPage.campusMapPage {
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.mainPage.fullCampusMapPage {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background: #eef4ee;
+}
+
+.appFrame {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  display: grid;
+  grid-template-rows:
+    clamp(52px, 7vh, 70px)
+    minmax(260px, 42vh)
+    minmax(76px, 12vh)
+    minmax(104px, 16vh)
+    minmax(58px, 8vh);
+  row-gap: clamp(8px, 1.3vh, 16px);
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.topNav {
+  height: 100%;
+  padding: 0 clamp(40px, 9vw, 180px);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: clamp(42px, 7vw, 116px);
+  background: #eeeeee;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.buildingTopNav {
+  height: clamp(52px, 7vh, 70px);
+}
+
+.navLink {
+  white-space: nowrap;
+}
+
+.navButtonLink {
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  font-weight: inherit;
+}
+
+.heroPanel {
+  width: calc(100% - clamp(48px, 6vw, 120px));
+  height: 100%;
+  margin: 0 auto;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 4px solid #6199ff;
+  background:
+    radial-gradient(circle at 86% 17%, rgba(255, 255, 255, 0.85) 0 18px, transparent 19px),
+    linear-gradient(90deg, #ffffff 0%, #f6f9ff 54%, #edf4ff 100%);
+  overflow: hidden;
+}
+
+.heroCopy {
+  width: clamp(390px, 36vw, 620px);
+  height: 100%;
+  padding: 0 0 0 clamp(24px, 3vw, 48px);
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.heroCopy p {
+  margin: 0 0 clamp(10px, 1.4vh, 18px);
+  color: #4b7dff;
+  font-size: clamp(14px, 1.15vw, 19px);
+  font-weight: 800;
+}
+
+.heroCopy h1 {
+  margin: 0;
+  color: #111111;
+  font-size: clamp(42px, 4.7vw, 76px);
+  line-height: 1.08;
+  letter-spacing: -1.2px;
+  font-weight: 900;
+}
+
+.heroCopy h1 span {
+  display: block;
+  color: #4c76ff;
+}
+
+.heroCopy strong {
+  display: block;
+  margin-top: clamp(18px, 2.6vh, 30px);
+  color: #333333;
+  font-size: clamp(14px, 1.1vw, 18px);
+  line-height: 1.7;
+  font-weight: 700;
+}
+
+.quickArrow svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.campusArt {
+  width: min(62vw, 980px);
+  height: 96%;
+  margin: 0 clamp(24px, 3vw, 52px) 0 0;
+}
+
+.campusArt svg {
+  width: 100%;
+  height: 100%;
+}
+
+.cloud {
+  fill: #ffffff;
+  opacity: 0.9;
+}
+
+.trees circle {
+  fill: #a8bee6;
+}
+
+.treeTrunk {
+  fill: #8da9d9;
+}
+
+.mainBuilding path:first-child,
+.mainBuilding .tower,
+.sideBuilding rect:first-child {
+  fill: #bdd0f2;
+}
+
+.mainBuilding .roof,
+.mainBuilding .towerRoof {
+  fill: #93b2e3;
+}
+
+.mainBuilding rect,
+.sideBuilding rect:not(:first-child) {
+  fill: #eef5ff;
+}
+
+.mainBuilding .door {
+  fill: #6f92d0;
+}
+
+.clockHand {
+  fill: none;
+  stroke: #7a9bd6;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pin {
+  fill: #4d70e9;
+}
+
+.pinHole {
+  fill: #dfe9ff;
+}
+
+.ground {
+  fill: none;
+  stroke: #c8d6ef;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.quickMenuGrid {
+  width: calc(100% - clamp(56px, 7vw, 140px));
+  height: 100%;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(24px, 5vw, 80px);
+  transform: translateY(clamp(18px, 3vh, 32px));
+}
+
+.quickMenuCard {
+  min-height: 0;
+  height: 100%;
+  padding: 0 0 clamp(8px, 1.3vh, 14px);
+  display: grid;
+  grid-template-columns: clamp(58px, 5.6vw, 76px) 1fr 34px;
+  align-items: center;
+  text-align: left;
+  background: transparent;
+  border-bottom: 1px solid #e8eaf2;
+}
+
+.quickIcon {
+  width: clamp(52px, 6.5vh, 68px);
+  height: clamp(52px, 6.5vh, 68px);
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+}
+
+.quickIcon.quickIconSearch {
+  background: #eef3ff;
+  color: #376dff;
+}
+
+.quickIcon.quickIconBoard {
+  background: #f0e9ff;
+  color: #6d4bd8;
+}
+
+.quickIcon.quickIconFacility {
+  background: #ebf8e8;
+  color: #55be57;
+}
+
+.quickIcon svg {
+  width: clamp(30px, 4vh, 40px);
+  height: clamp(30px, 4vh, 40px);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.quickText strong {
+  display: block;
+  margin-bottom: 5px;
+  color: #161616;
+  font-size: clamp(15px, 1.25vw, 22px);
+  font-weight: 900;
+}
+
+.quickText small {
+  display: block;
+  white-space: pre-line;
+  color: #343434;
+  font-size: clamp(12px, 0.95vw, 16px);
+  line-height: 1.45;
+  font-weight: 700;
+}
+
+.quickArrow {
+  color: #6e7788;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.mapPreview {
+  width: calc(100% - clamp(48px, 6vw, 120px));
+  height: 100%;
+  margin: clamp(18px, 3vh, 34px) auto 0;
+  position: relative;
+  border-radius: 15px;
+  overflow: hidden;
+  background: #eef4ee;
+  transform: translateY(clamp(18px, 3vh, 32px));
+}
+
+.mapPattern {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.mapPattern path {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 18;
+  stroke-linecap: round;
+}
+
+.mapPattern rect:not(:first-child) {
+  fill: #dfe4e8;
+  opacity: 0.65;
+}
+
+.mapPattern circle {
+  fill: #dcefd3;
+  opacity: 0.85;
+}
+
+.mapPattern g path {
+  fill: #5d88f4;
+  stroke: none;
+}
+
+.mapPattern g circle {
+  fill: #eaf1ff;
+  opacity: 1;
+}
+
+.mapPreviewCard {
+  width: clamp(260px, 23vw, 390px);
+  height: clamp(88px, 12vh, 130px);
+  position: absolute;
+  left: clamp(24px, 4vw, 72px);
+  top: 50%;
+  display: grid;
+  grid-template-columns: clamp(48px, 4.4vw, 62px) 1fr;
+  align-items: center;
+  padding: 0 clamp(28px, 3vw, 44px);
+  text-align: left;
+  background: #ffffff;
+  border-radius: 8px;
+  transform: translateY(-50%);
+  box-shadow: 0 10px 20px rgba(45, 66, 105, 0.12);
+}
+
+.mapIcon {
+  width: clamp(36px, 4vh, 46px);
+  height: clamp(36px, 4vh, 46px);
+  fill: none;
+  stroke: #4b6fff;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.mapPreviewCard strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #222222;
+  font-size: clamp(15px, 1.25vw, 22px);
+  font-weight: 900;
+}
+
+.mapPreviewCard small {
+  color: #333333;
+  font-size: clamp(12px, 0.95vw, 16px);
+  line-height: 1.5;
+  font-weight: 700;
+}
+
+.footerLinks {
+  height: 100%;
+  padding-top: clamp(18px, 3vh, 34px);
+  padding-right: clamp(48px, 7vw, 140px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 28px;
+  color: #111111;
+  font-size: 16px;
+  font-weight: 700;
+  transform: translateY(clamp(26px, 4vh, 44px));
+}
+
+.footerLinks button {
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  font-weight: inherit;
+}
+
+.footerLinks span {
+  width: 1px;
+  height: 12px;
+  background: #111111;
+}
+
+.footerModalOverlay {
+  position: fixed;
+  z-index: 3000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.42);
+}
+
+.footerModal {
+  width: min(520px, 100%);
+  max-height: min(640px, calc(100vh - 48px));
+  overflow: auto;
+  padding: 28px;
+  background: #ffffff;
+  border: 1px solid #e4e7f2;
+  border-radius: 18px;
+  box-shadow: 0 28px 80px rgba(15, 23, 42, 0.24);
+}
+
+.footerModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.footerModalHeader h2 {
+  margin: 0;
+  color: #111111;
+  font-size: 26px;
+  line-height: 1.2;
+  font-weight: 900;
+}
+
+.footerModalHeader button {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  color: #697083;
+  background: #f4f6fb;
+  border-radius: 999px;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.footerModalBody {
+  margin-top: 22px;
+  display: grid;
+  gap: 14px;
+}
+
+.footerModalBody p {
+  margin: 0;
+  color: #4b5565;
+  font-size: 16px;
+  line-height: 1.7;
+  font-weight: 650;
+}
+
+.buildingPageContent {
+  width: min(1280px, calc(100% - 56px));
+  margin: 34px auto 56px;
+}
+
+.campusMapContent {
+  width: min(1280px, calc(100% - 56px));
+  height: calc(100vh - clamp(52px, 7vh, 70px));
+  margin: 0 auto;
+  padding: 34px 0 40px;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 24px;
+}
+
+.buildingHeader {
+  margin-bottom: 24px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.mapPageHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.buildingHeader p,
+.mapPageHeader p {
+  margin: 0 0 6px;
+  color: #5e6dff;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.buildingHeader h1,
+.mapPageHeader h1 {
+  margin: 0;
+  color: #111111;
+  font-size: 34px;
+  line-height: 1;
+  font-weight: 900;
+}
+
+.buildingHeader button,
+.mapPageHeader button {
+  height: 40px;
+  padding: 0 18px;
+  color: #5b63ff;
+  background: #f2f0ff;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.campusMapShell {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 24px;
+}
+
+.largeCampusMap {
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #e4e7f2;
+  border-radius: 18px;
+  background: #eef4ee;
+  box-shadow: 0 18px 45px rgba(37, 45, 83, 0.08);
+}
+
+.leafletCampusMap {
+  width: 100%;
+  height: 100%;
+}
+
+.largeCampusMap .leaflet-container {
+  width: 100%;
+  height: 100%;
+  font-family: inherit;
+}
+
+.fullLeafletMap {
+  width: 100%;
+  height: 100%;
+  font-family: inherit;
+}
+
+.fullMapControls {
+  position: absolute;
+  z-index: 1000;
+  left: 24px;
+  top: 24px;
+  display: flex;
+  gap: 10px;
+}
+
+.fullMapControls button {
+  height: 42px;
+  padding: 0 16px;
+  color: #151827;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid #e2e6f0;
+  border-radius: 999px;
+  box-shadow: 0 12px 28px rgba(37, 45, 83, 0.14);
+  font-size: 14px;
+  font-weight: 850;
+}
+
+.leafletBuildingMarker {
+  background: transparent;
+  border: 0;
+}
+
+.leafletBuildingMarker svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+  filter: drop-shadow(0 10px 14px rgba(74, 100, 230, 0.28));
+}
+
+.leafletBuildingMarker path {
+  fill: #5d6ff0;
+}
+
+.leafletBuildingMarker circle {
+  fill: #edf2ff;
+}
+
+.leafletBuildingMarker.selected svg {
+  filter: drop-shadow(0 12px 18px rgba(54, 184, 102, 0.34));
+}
+
+.leafletBuildingMarker.selected path {
+  fill: #36b866;
+}
+
+.leaflet-popup-content {
+  margin: 12px 14px;
+  color: #151827;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.leaflet-popup-content strong {
+  color: #111111;
+  font-size: 16px;
+}
+
+.mapBuildingPanel {
+  min-width: 0;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e4e7f2;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 18px 45px rgba(37, 45, 83, 0.08);
+}
+
+.mapBuildingPanel img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  display: block;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.mapBuildingPanel div {
+  padding: 22px 8px 4px;
+}
+
+.mapBuildingPanel strong {
+  display: block;
+  color: #111111;
+  font-size: 30px;
+  line-height: 1.15;
+  font-weight: 900;
+}
+
+.mapBuildingPanel span {
+  width: fit-content;
+  margin-top: 18px;
+  padding: 7px 14px;
+  display: block;
+  color: #6655ff;
+  background: #f1edff;
+  border-radius: 999px;
+  font-size: 16px;
+  line-height: 1;
+  font-weight: 800;
+}
+
+.mapBuildingPanel p {
+  margin: 22px 0 0;
+  white-space: pre-line;
+  color: #697083;
+  font-size: 18px;
+  line-height: 1.65;
+  font-weight: 650;
+}
+
+.buildingGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px;
+}
+
+.buildingCard {
+  min-height: 318px;
+  display: grid;
+  grid-template-columns: minmax(260px, 52%) 1fr;
+  gap: 28px;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid #e6e8f2;
+  border-radius: 12px;
+  box-shadow: 0 10px 28px rgba(37, 45, 83, 0.05);
+}
+
+.buildingImage {
+  min-height: 286px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #e8edf7;
+}
+
+.buildingImage img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.studentHall {
+  --sky: #d9e8ff;
+  --mountain: #315f3b;
+  --lawn: #7da460;
+  --block: #a65a4e;
+  --glass: #f4e0d7;
+  --door: #3f3f4f;
+}
+
+.centennialHall {
+  --sky: #bcd9ff;
+  --mountain: #609451;
+  --lawn: #70a851;
+  --block: #d9e3ef;
+  --glass: #ffffff;
+  --door: #2c5f85;
+}
+
+.engineeringHall {
+  --sky: #c9d7f1;
+  --mountain: #4b683e;
+  --lawn: #789658;
+  --block: #b8bec8;
+  --glass: #edf1f7;
+  --door: #687281;
+}
+
+.library {
+  --sky: #9eb8e8;
+  --mountain: #415a72;
+  --lawn: #314828;
+  --block: #566781;
+  --glass: #f0d47c;
+  --door: #2c3444;
+}
+
+.buildingSky {
+  fill: var(--sky);
+}
+
+.buildingMountain {
+  fill: var(--mountain);
+  opacity: 0.86;
+}
+
+.buildingLawn {
+  fill: var(--lawn);
+}
+
+.buildingBlock {
+  fill: var(--block);
+}
+
+.buildingGlass {
+  fill: var(--glass);
+}
+
+.buildingDoor {
+  fill: var(--door);
+}
+
+.buildingPath {
+  fill: rgba(255, 255, 255, 0.36);
+}
+
+.buildingInfo {
+  min-width: 0;
+  padding: 14px 8px 10px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.buildingTitleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.buildingTitleRow h2 {
+  margin: 8px 0 0;
+  color: #111111;
+  font-size: 28px;
+  line-height: 1.1;
+  font-weight: 900;
+}
+
+.buildingInfo > span {
+  width: fit-content;
+  margin-top: 26px;
+  padding: 6px 13px;
+  color: #6655ff;
+  background: #f1edff;
+  border-radius: 999px;
+  font-size: 16px;
+  line-height: 1;
+  font-weight: 800;
+}
+
+.buildingInfo p {
+  margin: 22px 0 0;
+  white-space: pre-line;
+  color: #697083;
+  font-size: 20px;
+  line-height: 1.65;
+  font-weight: 650;
+}
+
+.buildingInfo button {
+  width: fit-content;
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #5b63ff;
+  background: transparent;
+  font-size: 21px;
+  font-weight: 850;
+}
+
+.buildingInfo button svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.facilityGroupGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 28px;
+}
+
+.facilityColumn {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.facilityGroupCard {
+  min-width: 0;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border: 1px solid #e6e8f2;
+  border-radius: 12px;
+  box-shadow: 0 10px 28px rgba(37, 45, 83, 0.05);
+}
+
+.facilityGroupHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #e9ecf4;
+}
+
+.facilityGroupHeader h2 {
+  margin: 0;
+  color: #111111;
+  font-size: 28px;
+  line-height: 1.1;
+  font-weight: 900;
+}
+
+.facilityGroupHeader > span {
+  flex: 0 0 auto;
+  padding: 7px 13px;
+  color: #6655ff;
+  background: #f1edff;
+  border-radius: 999px;
+  font-size: 15px;
+  line-height: 1;
+  font-weight: 800;
+}
+
+.facilityList {
+  display: grid;
+}
+
+.facilityItem {
+  padding: 20px 0;
+  border-bottom: 1px solid #eef0f6;
+}
+
+.facilityItem div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.facilityItem strong {
+  color: #111111;
+  font-size: 21px;
+  line-height: 1.2;
+  font-weight: 900;
+}
+
+.facilityItem span {
+  padding: 5px 11px;
+  color: #6655ff;
+  background: #f1edff;
+  border-radius: 999px;
+  font-size: 14px;
+  line-height: 1;
+  font-weight: 800;
+}
+
+.facilityItem p {
+  margin: 12px 0 0;
+  white-space: pre-line;
+  color: #697083;
+  font-size: 17px;
+  line-height: 1.6;
+  font-weight: 650;
+}
+
+.facilityMapButton {
+  width: fit-content;
+  margin-top: 22px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #5b63ff;
+  background: transparent;
+  font-size: 19px;
+  font-weight: 850;
+}
+
+.facilityMapButton svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media (max-width: 860px) {
+  .topNav {
+    padding: 0 22px;
+    gap: 18px;
+    justify-content: flex-end;
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 980px) {
+  .buildingGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .facilityGroupGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .campusMapShell {
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+  }
+
+  .largeCampusMap {
+    min-height: 420px;
+  }
+}
+
+@media (max-width: 700px) {
+  .appFrame {
+    grid-template-rows: 56px 1fr;
+    row-gap: 14px;
+    overflow-y: auto;
+  }
+
+  .mainPage {
+    overflow: auto;
+  }
+
+  .heroPanel {
+    height: auto;
+    min-height: 330px;
+    flex-direction: column;
+  }
+
+  .heroCopy {
+    width: 100%;
+    padding: 22px 18px 0;
+  }
+
+  .campusArt {
+    width: 100%;
+    margin: 0;
+  }
+
+  .quickMenuGrid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    transform: none;
+  }
+
+  .mapPreview {
+    height: 140px;
+    transform: none;
+  }
+
+  .footerLinks {
+    transform: none;
+  }
+
+  .buildingPageContent {
+    width: calc(100% - 28px);
+    margin-top: 20px;
+  }
+
+  .buildingHeader {
+    align-items: flex-start;
+    gap: 14px;
+    flex-direction: column;
+  }
+
+  .buildingCard {
+    grid-template-columns: 1fr;
+  }
+
+  .campusMapContent {
+    width: calc(100% - 28px);
+    height: auto;
+    min-height: calc(100vh - 56px);
+    padding-top: 20px;
+  }
+
+  .campusMapPage {
+    overflow: auto;
+  }
+
+  .mapPageHeader {
+    align-items: flex-start;
+    gap: 14px;
+    flex-direction: column;
+  }
+
+  .buildingInfo {
+    padding: 0 4px 8px;
+  }
+
+  .buildingInfo p {
+    font-size: 16px;
+  }
+
+  .facilityGroupCard {
+    padding: 22px;
+  }
+
+  .facilityGroupHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .facilityItem p {
+    font-size: 15px;
+  }
+}
