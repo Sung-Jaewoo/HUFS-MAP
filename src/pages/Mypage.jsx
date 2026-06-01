@@ -6,9 +6,9 @@ function MyPage() {
     <div className="mypage">
       <header className="top-nav">
         <Link to="/">메인페이지</Link>
-        <Link to="#">게시판</Link>
+        <Link to="/post">게시판</Link>
         <Link to="/mypage">마이페이지</Link>
-        <Link to="/">로그인</Link>
+        <Link to="/login">로그인</Link>
       </header>
 
       <main className="mypage-main">
