@@ -3,6 +3,11 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
+import MyPage from './pages/MyPage'
+import EditProfilePage from './pages/EditProfilePage'
+import MyPostsPage from './pages/MyPostsPage'
+import CommentPage from './pages/CommentPage'
+import FavoritePage from './pages/FavoritePage'
 
 function App() {
   return (
@@ -11,6 +16,11 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
+        <Route path="/mypage" element={<MyPage />} />
+        <Route path="/mypage/edit" element={<EditProfilePage />} />
+        <Route path="/mypage/posts" element={<MyPostsPage />} />
+        <Route path="/mypage/comments" element={<CommentPage />} />
+        <Route path="/mypage/favorites" element={<FavoritePage />} />
       </Routes>
     </BrowserRouter>
   )
