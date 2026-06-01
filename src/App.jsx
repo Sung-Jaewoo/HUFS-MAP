@@ -2,7 +2,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
-import MyPage from './pages/MyPage'
+import Postpage from './pages/Postpage'
+import MyPage from './pages/Mypage'
 import EditProfilePage from './pages/EditProfilePage'
 import MyPostsPage from './pages/MyPostsPage'
 import CommentPage from './pages/CommentPage'
@@ -13,6 +14,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LoginPage />} />
+        <Route path="/post" element={<Postpage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/mypage" element={<MyPage />} />
         <Route path="/mypage/edit" element={<EditProfilePage />} />
