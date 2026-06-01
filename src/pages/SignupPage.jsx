@@ -79,10 +79,10 @@ function SignupPage() {
   return (
     <div className="signup-page">
       <header className="top-nav">
-        <Link to="#">캠퍼스맵</Link>
-        <Link to="#">게시판</Link>
+        <Link to="/campus-map">캠퍼스맵</Link>
+        <Link to="/post">게시판</Link>
         <Link to="/mypage">마이페이지</Link>
-        <Link to="/">로그인</Link>
+        <Link to="/login">로그인</Link>
       </header>
 
       <main className="signup-main">
