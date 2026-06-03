@@ -1,20 +1,27 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { login } from '../services/auth'
 import './LoginPage.css'
 
 function LoginPage() {
-  const [error, setError] = useState(false)
+  const navigate = useNavigate()
+  const [error, setError] = useState('')
   const [id, setId] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [password, setPassword] = useState('')
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault()
+    setError('')
+    setIsSubmitting(true)
 
-    if (id === 'testuser' && password === '1234') {
-      setError(false)
-      alert('로그인 성공!')
-    } else {
-      setError(true)
+    try {
+      await login({ emailOrUsername: id, password })
+      navigate('/mypage')
+    } catch (loginError) {
+      setError(loginError.message || '아이디 또는 비밀번호가 올바르지 않습니다.')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -43,7 +50,7 @@ function LoginPage() {
 
           {error && (
             <p className="error-message">
-              ⓘ 아이디 또는 비밀번호가 올바르지 않습니다.
+              ⓘ {error}
             </p>
           )}
 
@@ -84,7 +91,7 @@ function LoginPage() {
             </div>
 
             <button type="submit" className="login-btn">
-              로그인
+              {isSubmitting ? '로그인 중...' : '로그인'}
             </button>
           </form>
 

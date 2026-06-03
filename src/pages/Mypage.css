@@ -191,7 +191,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border: 0;
   color: #6b7280;
+  cursor: pointer;
   font-size: 13px;
 }
 

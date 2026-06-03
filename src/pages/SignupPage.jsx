@@ -1,8 +1,14 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import {
+  sendSignupEmailToken,
+  signUp,
+  verifySignupEmailToken,
+} from '../services/auth'
 import './SignupPage.css'
 
 function SignupPage() {
+  const navigate = useNavigate()
   const [form, setForm] = useState({
     email: '',
     code: '',
@@ -12,7 +18,13 @@ function SignupPage() {
     nickname: '',
   })
 
+  const [emailTokenUserId, setEmailTokenUserId] = useState('')
   const [errors, setErrors] = useState({})
+  const [isEmailVerified, setIsEmailVerified] = useState(false)
+  const [isSendingCode, setIsSendingCode] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isVerifyingCode, setIsVerifyingCode] = useState(false)
+  const [statusMessage, setStatusMessage] = useState('')
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -26,9 +38,20 @@ function SignupPage() {
       ...errors,
       [name]: '',
     })
+
+    setStatusMessage('')
+
+    if (name === 'email' || name === 'userId') {
+      setEmailTokenUserId('')
+      setIsEmailVerified(false)
+    }
+
+    if (name === 'code') {
+      setIsEmailVerified(false)
+    }
   }
 
-  const validate = () => {
+  const validate = ({ requireCode = true, requireProfile = true } = {}) => {
     const newErrors = {}
 
     if (!form.email.endsWith('@hufs.ac.kr')) {
@@ -36,29 +59,29 @@ function SignupPage() {
         '해당 이메일은 존재하지 않습니다. 학교 이메일을 확인해주세요.'
     }
 
-    if (form.code.length !== 6) {
+    if (requireCode && form.code.length !== 6) {
       newErrors.code = '인증번호 6자리를 입력해주세요.'
     }
 
-    if (form.userId === 'testuser') {
-      newErrors.userId = '이미 사용 중인 아이디입니다.'
+    if (!/^[A-Za-z0-9]{4,20}$/.test(form.userId)) {
+      newErrors.userId = '아이디는 영문, 숫자 조합 4~20자로 입력해주세요.'
     }
 
-    if (
+    if (requireProfile && (
       form.password.length < 8 ||
       !/[A-Za-z]/.test(form.password) ||
       !/[0-9]/.test(form.password) ||
       !/[!@#$%^&*]/.test(form.password)
-    ) {
+    )) {
       newErrors.password =
         '영문, 숫자, 특수문자 조합 8~20자로 입력해주세요.'
     }
 
-    if (form.password !== form.passwordCheck) {
+    if (requireProfile && form.password !== form.passwordCheck) {
       newErrors.passwordCheck = '비밀번호가 일치하지 않습니다.'
     }
 
-    if (form.nickname.length < 2 || form.nickname.length > 12) {
+    if (requireProfile && (form.nickname.length < 2 || form.nickname.length > 12)) {
       newErrors.nickname =
         '닉네임은 2자 이상 12자 이하로 입력해주세요.'
     }
@@ -68,11 +91,95 @@ function SignupPage() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = (e) => {
+  const handleSendCode = async () => {
+    if (!validate({ requireCode: false, requireProfile: false })) return
+
+    setIsSendingCode(true)
+    setStatusMessage('')
+
+    try {
+      const token = await sendSignupEmailToken({
+        email: form.email,
+        username: form.userId,
+      })
+
+      setEmailTokenUserId(token.userId)
+      setStatusMessage('인증번호를 이메일로 전송했습니다.')
+    } catch (error) {
+      setErrors((current) => ({
+        ...current,
+        email: error.message || '인증번호 전송에 실패했습니다.',
+      }))
+    } finally {
+      setIsSendingCode(false)
+    }
+  }
+
+  const handleVerifyCode = async () => {
+    if (!emailTokenUserId) {
+      setErrors((current) => ({
+        ...current,
+        code: '먼저 인증번호를 전송해주세요.',
+      }))
+      return
+    }
+
+    if (form.code.length !== 6) {
+      setErrors((current) => ({
+        ...current,
+        code: '인증번호 6자리를 입력해주세요.',
+      }))
+      return
+    }
+
+    setIsVerifyingCode(true)
+    setStatusMessage('')
+
+    try {
+      await verifySignupEmailToken({
+        userId: emailTokenUserId,
+        secret: form.code,
+      })
+      setIsEmailVerified(true)
+      setStatusMessage('이메일 인증이 완료되었습니다.')
+    } catch (error) {
+      setErrors((current) => ({
+        ...current,
+        code: error.message || '인증번호 확인에 실패했습니다.',
+      }))
+    } finally {
+      setIsVerifyingCode(false)
+    }
+  }
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
 
-    if (validate()) {
-      alert('회원가입 성공!')
+    if (!validate()) return
+
+    if (!isEmailVerified) {
+      setErrors((current) => ({
+        ...current,
+        code: '이메일 인증을 완료해주세요.',
+      }))
+      return
+    }
+
+    setIsSubmitting(true)
+    setStatusMessage('')
+
+    try {
+      await signUp({
+        email: form.email,
+        password: form.password,
+        username: form.userId,
+        nickname: form.nickname,
+      })
+      navigate('/mypage')
+    } catch (error) {
+      setStatusMessage(error.message || '회원가입에 실패했습니다.')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -125,8 +232,13 @@ function SignupPage() {
                 )}
               </div>
 
-              <button type="button" className="signup-small-btn">
-                전송
+              <button
+                type="button"
+                className="signup-small-btn"
+                onClick={handleSendCode}
+                disabled={isSendingCode}
+              >
+                {isSendingCode ? '전송 중' : '전송'}
               </button>
             </div>
 
@@ -148,10 +260,19 @@ function SignupPage() {
                 )}
               </div>
 
-              <button type="button" className="signup-small-btn">
-                확인
+              <button
+                type="button"
+                className="signup-small-btn"
+                onClick={handleVerifyCode}
+                disabled={isVerifyingCode}
+              >
+                {isVerifyingCode ? '확인 중' : '확인'}
               </button>
             </div>
+
+            {statusMessage && (
+              <p className="field-error">{statusMessage}</p>
+            )}
 
             <div className="signup-form-row full">
               <label>아이디</label>
@@ -245,14 +366,15 @@ function SignupPage() {
             <button
               type="submit"
               className="signup-submit-btn"
+              disabled={isSubmitting}
             >
-              회원가입
+              {isSubmitting ? '가입 중...' : '회원가입'}
             </button>
           </form>
 
           <p className="login-link">
             이미 계정이 있으신가요?{' '}
-            <Link to="/">로그인</Link>
+            <Link to="/login">로그인</Link>
           </p>
         </section>
       </main>

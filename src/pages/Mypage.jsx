@@ -1,7 +1,49 @@
-import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { getCurrentUser, logout } from '../services/auth'
 import './Mypage.css'
 
 function MyPage() {
+  const navigate = useNavigate()
+  const [user, setUser] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const loadUser = async () => {
+      const currentUser = await getCurrentUser()
+
+      if (!currentUser) {
+        navigate('/login')
+        return
+      }
+
+      setUser(currentUser)
+      setIsLoading(false)
+    }
+
+    loadUser()
+  }, [navigate])
+
+  const handleLogout = async () => {
+    await logout().catch(() => {})
+    navigate('/login')
+  }
+
+  if (isLoading) {
+    return (
+      <div className="mypage">
+        <main className="mypage-main">
+          <p className="subtitle">사용자 정보를 불러오는 중입니다.</p>
+        </main>
+      </div>
+    )
+  }
+
+  const profile = user.profile || {}
+  const displayName = profile.nickname || user.name || '사용자'
+  const username = profile.username || '학생'
+  const email = profile.email || user.email
+
   return (
     <div className="mypage">
       <header className="top-nav">
@@ -23,12 +65,12 @@ function MyPage() {
 
           <div className="profile-info">
             <div className="name-row">
-              <strong>홍길동</strong>
-              <span>학생</span>
+              <strong>{displayName}</strong>
+              <span>{username}</span>
             </div>
 
-            <p>컴퓨터공학과</p>
-            <p>honggildong@ooo.ac.kr</p>
+            <p>HUFS MAP 회원</p>
+            <p>{email}</p>
           </div>
 
           <Link to="/mypage/edit">
@@ -101,10 +143,10 @@ function MyPage() {
         </Link>
 
         <section className="bottom-grid">
-          <div className="small-card">
+          <button className="small-card" type="button" onClick={handleLogout}>
             <span>↪ 로그아웃</span>
             <b>›</b>
-          </div>
+          </button>
 
           <div className="small-card danger">
             <span>⚤ 탈퇴하기</span>
