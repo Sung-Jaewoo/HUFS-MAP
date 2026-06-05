@@ -1,4 +1,11 @@
 import { useEffect, useState } from "react";
+import {
+  createPost,
+  createReport,
+  listPosts,
+  updatePostFavorite,
+} from "../services/board";
+import { getCurrentUser } from "../services/auth";
 import "./Postpage.css";
 
 const text = {
@@ -38,6 +45,7 @@ const text = {
   noPosts: "아직 게시글이 없습니다.",
   noFavoriteBuildings: "즐겨찾기한 건물이 없습니다.",
   noLikedPosts: "좋아요한 게시물이 없습니다.",
+  loadingPosts: "게시글을 불러오는 중입니다.",
   me: "나",
 };
 
@@ -100,6 +108,8 @@ function Postpage() {
   const [view, setView] = useState("list");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isPostsLoading, setIsPostsLoading] = useState(true);
   const [posts, setPosts] = useState(initialPosts);
   const [favoriteCategories, setFavoriteCategories] = useState([]);
   const [detailPostId, setDetailPostId] = useState(null);
@@ -117,6 +127,7 @@ function Postpage() {
     content: "",
     category: categories[1],
     image: null,
+    imageFile: null,
   });
 
   const resetPostDraft = (category = categories[1]) => {
@@ -125,8 +136,45 @@ function Postpage() {
       content: "",
       category,
       image: null,
+      imageFile: null,
     });
   };
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadBoard = async () => {
+      setIsPostsLoading(true);
+
+      const user = await getCurrentUser();
+
+      if (!isMounted) return;
+
+      setCurrentUser(user);
+
+      try {
+        const loadedPosts = await listPosts({ currentUserId: user?.$id });
+
+        if (isMounted) {
+          setPosts(loadedPosts);
+        }
+      } catch (error) {
+        if (isMounted) {
+          setPostError(error.message || "게시글을 불러오지 못했습니다.");
+        }
+      } finally {
+        if (isMounted) {
+          setIsPostsLoading(false);
+        }
+      }
+    };
+
+    loadBoard();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     window.history.replaceState(
@@ -280,18 +328,23 @@ function Postpage() {
     );
   };
 
-  const toggleLike = (postId) => {
-    setPosts((currentPosts) =>
-      currentPosts.map((post) => {
-        if (post.id !== postId) return post;
+  const toggleLike = async (postId) => {
+    const targetPost = posts.find((post) => post.id === postId);
 
-        return {
-          ...post,
-          liked: !post.liked,
-          likes: post.liked ? Math.max(post.likes - 1, 0) : post.likes + 1,
-        };
-      }),
-    );
+    if (!targetPost) return;
+
+    try {
+      const updatedPost = await updatePostFavorite({
+        currentUserId: currentUser?.$id,
+        post: targetPost,
+      });
+
+      setPosts((currentPosts) =>
+        currentPosts.map((post) => (post.id === postId ? updatedPost : post)),
+      );
+    } catch (error) {
+      window.alert(error.message || "즐겨찾기를 변경하지 못했습니다.");
+    }
   };
 
   const changeDraftImage = (event) => {
@@ -302,10 +355,11 @@ function Postpage() {
     setPostDraft((draft) => ({
       ...draft,
       image: URL.createObjectURL(file),
+      imageFile: file,
     }));
   };
 
-  const submitPost = (event) => {
+  const submitPost = async (event) => {
     event?.preventDefault();
 
     if (!postDraft.title.trim()) {
@@ -318,28 +372,33 @@ function Postpage() {
       return;
     }
 
-    const newPost = {
-      id: Date.now(),
-      title: postDraft.title.trim(),
-      content: postDraft.content.trim(),
-      createdAt: new Date().toISOString(),
-      likes: 0,
-      comments: [],
-      liked: false,
-      image: postDraft.image,
-      category: postDraft.category,
-    };
+    if (!currentUser) {
+      setPostError("로그인 후 게시글을 작성할 수 있습니다.");
+      return;
+    }
 
-    setPosts((currentPosts) => [newPost, ...currentPosts]);
-    setSelectedCategory(postDraft.category);
-    resetPostDraft(postDraft.category);
-    setPostError("");
-    pushPageState({
-      view: "list",
-      detailPostId: null,
-      selectedCategory: postDraft.category,
-    });
-    setView("list");
+    try {
+      const newPost = await createPost({
+        building: postDraft.category,
+        content: postDraft.content.trim(),
+        currentUser,
+        imageFile: postDraft.imageFile,
+        title: postDraft.title.trim(),
+      });
+
+      setPosts((currentPosts) => [newPost, ...currentPosts]);
+      setSelectedCategory(postDraft.category);
+      resetPostDraft(postDraft.category);
+      setPostError("");
+      pushPageState({
+        view: "list",
+        detailPostId: null,
+        selectedCategory: postDraft.category,
+      });
+      setView("list");
+    } catch (error) {
+      setPostError(error.message || "게시글을 등록하지 못했습니다.");
+    }
   };
 
   const updateDetailCommentDraft = (value) => {
@@ -549,7 +608,7 @@ function Postpage() {
     setReportMessage("");
   };
 
-  const submitReport = (event) => {
+  const submitReport = async (event) => {
     event.preventDefault();
 
     if (!reportDraft) {
@@ -557,13 +616,29 @@ function Postpage() {
       return;
     }
 
-    setReportDraft("");
-    setReportMessage(text.reportDone);
+    if (!currentUser) {
+      setReportMessage("로그인 후 신고할 수 있습니다.");
+      return;
+    }
 
-    window.setTimeout(() => {
-      setIsReportOpen(false);
-      setReportMessage("");
-    }, 2500);
+    try {
+      await createReport({
+        targetType: "post",
+        targetId: detailPostId,
+        reason: reportDraft,
+        reporterId: currentUser.$id,
+      });
+
+      setReportDraft("");
+      setReportMessage(text.reportDone);
+
+      window.setTimeout(() => {
+        setIsReportOpen(false);
+        setReportMessage("");
+      }, 2500);
+    } catch (error) {
+      setReportMessage(error.message || "신고를 접수하지 못했습니다.");
+    }
   };
 
   if (view === "home") {
@@ -666,6 +741,7 @@ function Postpage() {
           <ListView
             favoriteCategories={favoriteCategories}
             filteredPosts={filteredPosts}
+            isLoading={isPostsLoading}
             onFavoriteToggle={toggleFavoriteCategory}
             onLike={toggleLike}
             onOpenDetail={openDetailPage}
@@ -734,6 +810,7 @@ function Postpage() {
 function ListView({
   favoriteCategories,
   filteredPosts,
+  isLoading,
   onFavoriteToggle,
   onLike,
   onOpenDetail,
@@ -773,7 +850,9 @@ function ListView({
         })}
       </div>
 
-      {filteredPosts.length > 0 ? (
+      {isLoading ? (
+        <div className="emptyPosts">{text.loadingPosts}</div>
+      ) : filteredPosts.length > 0 ? (
         <section className="postGrid">
           {filteredPosts.map((post) => (
             <PostCard
@@ -913,8 +992,8 @@ function DetailPostView({
         <div className="detailBody">
           <h2>{post.title}</h2>
           <div className="detailAuthor">
-            <span>{text.me}</span>
-            <p>{text.me}</p>
+            <span>{(post.authorName || text.me).slice(0, 1)}</span>
+            <p>{post.authorName || text.me}</p>
           </div>
           <p>{post.content || text.writeContent}</p>
         </div>

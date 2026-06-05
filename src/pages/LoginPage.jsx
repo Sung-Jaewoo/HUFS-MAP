@@ -6,7 +6,7 @@ import './LoginPage.css'
 function LoginPage() {
   const navigate = useNavigate()
   const [error, setError] = useState('')
-  const [id, setId] = useState('')
+  const [email, setEmail] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [password, setPassword] = useState('')
 
@@ -16,7 +16,7 @@ function LoginPage() {
     setIsSubmitting(true)
 
     try {
-      await login({ emailOrUsername: id, password })
+      await login({ email, password })
       navigate('/mypage')
     } catch (loginError) {
       setError(loginError.message || '아이디 또는 비밀번호가 올바르지 않습니다.')
@@ -56,13 +56,13 @@ function LoginPage() {
 
           <form onSubmit={handleLogin}>
             <div className="form-row">
-              <label>아이디</label>
+              <label>이메일</label>
 
               <input
-                type="text"
-                placeholder="아이디를 입력하세요"
-                value={id}
-                onChange={(e) => setId(e.target.value)}
+                type="email"
+                placeholder="학교 이메일을 입력하세요"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
 

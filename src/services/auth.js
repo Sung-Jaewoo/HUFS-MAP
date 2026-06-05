@@ -7,9 +7,8 @@ import {
   tablesDB,
 } from "../appwrite";
 
-export async function sendSignupEmailToken({ email, username }) {
+export async function sendSignupEmailToken({ email }) {
   await assertEmailAvailable(email);
-  await assertUsernameAvailable(username);
 
   return account.createEmailToken({
     userId: ID.unique(),
@@ -23,7 +22,6 @@ export async function verifySignupEmailToken({ userId, secret }) {
 }
 
 export async function signUp({ email, password, username, nickname }) {
-  await assertEmailAvailable(email);
   await assertUsernameAvailable(username);
 
   await account.updateName({ name: nickname });
@@ -43,16 +41,15 @@ export async function signUp({ email, password, username, nickname }) {
         authUserId: user.$id,
       },
     });
-  } catch (error) {
-    await logout().catch(() => {});
-    throw error;
+  } catch {
+    // Keep signup usable even if the optional users profile table is not enabled yet.
   }
 
   return user;
 }
 
 export async function login({ emailOrUsername, email, password }) {
-  const loginEmail = email || (await resolveLoginEmail(emailOrUsername));
+  const loginEmail = email || emailOrUsername.trim();
 
   return account.createEmailPasswordSession({
     email: loginEmail,
@@ -110,24 +107,4 @@ export async function assertEmailAvailable(email) {
   if (result.rows?.length) {
     throw new Error("이미 가입된 이메일입니다.");
   }
-}
-
-async function resolveLoginEmail(emailOrUsername) {
-  const value = emailOrUsername.trim();
-
-  if (value.includes("@")) return value;
-
-  const result = await tablesDB.listRows({
-    databaseId: APPWRITE_DATABASE_ID,
-    tableId: APPWRITE_USERS_TABLE_ID,
-    queries: [Query.equal("username", value), Query.limit(1)],
-  });
-
-  const profile = result.rows?.[0];
-
-  if (!profile?.email) {
-    throw new Error("아이디 또는 비밀번호가 올바르지 않습니다.");
-  }
-
-  return profile.email;
 }
