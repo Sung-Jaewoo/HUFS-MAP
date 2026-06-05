@@ -138,5 +138,5 @@ function parseFavoriteIds(value) {
 }
 
 function serializeFavoriteIds(favoriteIds) {
-  return JSON.stringify(favoriteIds);
+  return favoriteIds;
 }

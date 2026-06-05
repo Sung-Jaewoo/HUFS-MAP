@@ -6,6 +6,7 @@ import {
   updatePostFavorite,
 } from "../services/board";
 import { getCurrentUser } from "../services/auth";
+import { toKoreanErrorMessage } from "../services/errors";
 import "./Postpage.css";
 
 const text = {
@@ -104,6 +105,15 @@ function formatPostDate(createdAt) {
   return `${date.getMonth() + 1}/${date.getDate()}`;
 }
 
+function getUserDisplayName(user) {
+  return (
+    user?.profile?.nickname ||
+    user?.name ||
+    user?.email?.split("@")[0] ||
+    "익명"
+  );
+}
+
 function Postpage() {
   const [view, setView] = useState("list");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -160,7 +170,9 @@ function Postpage() {
         }
       } catch (error) {
         if (isMounted) {
-          setPostError(error.message || "게시글을 불러오지 못했습니다.");
+          setPostError(
+            toKoreanErrorMessage(error, "게시글을 불러오지 못했습니다."),
+          );
         }
       } finally {
         if (isMounted) {
@@ -236,6 +248,7 @@ function Postpage() {
         )
         .slice(0, 3)
     : [];
+  const currentAuthorName = getUserDisplayName(currentUser);
 
   const openBoardPage = () => {
     setSelectedCategory(null);
@@ -343,7 +356,9 @@ function Postpage() {
         currentPosts.map((post) => (post.id === postId ? updatedPost : post)),
       );
     } catch (error) {
-      window.alert(error.message || "즐겨찾기를 변경하지 못했습니다.");
+      window.alert(
+        toKoreanErrorMessage(error, "즐겨찾기를 변경하지 못했습니다."),
+      );
     }
   };
 
@@ -397,7 +412,9 @@ function Postpage() {
       });
       setView("list");
     } catch (error) {
-      setPostError(error.message || "게시글을 등록하지 못했습니다.");
+      setPostError(
+        toKoreanErrorMessage(error, "게시글을 등록하지 못했습니다."),
+      );
     }
   };
 
@@ -429,7 +446,7 @@ function Postpage() {
                 ...post.comments,
                 {
                   id: Date.now(),
-                  author: text.me,
+                  author: currentAuthorName,
                   content: detailCommentDraft.trim(),
                   likes: 0,
                   liked: false,
@@ -522,7 +539,7 @@ function Postpage() {
                         ...(comment.replies || []),
                         {
                           id: Date.now(),
-                          author: text.me,
+                          author: currentAuthorName,
                           content: replyDraft.trim(),
                           likes: 0,
                           liked: false,
@@ -637,7 +654,9 @@ function Postpage() {
         setReportMessage("");
       }, 2500);
     } catch (error) {
-      setReportMessage(error.message || "신고를 접수하지 못했습니다.");
+      setReportMessage(
+        toKoreanErrorMessage(error, "신고를 접수하지 못했습니다."),
+      );
     }
   };
 

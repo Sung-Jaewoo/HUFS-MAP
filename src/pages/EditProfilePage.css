@@ -119,7 +119,20 @@
 }
 
 .edit-row.password input {
+  margin-bottom: 0;
+}
+
+.password-input-wrap {
+  position: relative;
   margin-bottom: 14px;
+}
+
+.password-input-wrap input {
+  padding-right: 52px;
+}
+
+.edit-row .password-toggle {
+  right: 10px;
 }
 
 .helper-text {

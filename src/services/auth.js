@@ -29,27 +29,25 @@ export async function signUp({ email, password, username, nickname }) {
 
   const user = await account.get();
 
-  try {
-    await tablesDB.createRow({
-      databaseId: APPWRITE_DATABASE_ID,
-      tableId: APPWRITE_USERS_TABLE_ID,
-      rowId: user.$id,
-      data: {
-        email,
-        username,
-        nickname,
-        authUserId: user.$id,
-      },
-    });
-  } catch {
-    // Keep signup usable even if the optional users profile table is not enabled yet.
-  }
+  await tablesDB.createRow({
+    databaseId: APPWRITE_DATABASE_ID,
+    tableId: APPWRITE_USERS_TABLE_ID,
+    rowId: user.$id,
+    data: {
+      email,
+      username,
+      nickname,
+      authUserId: user.$id,
+    },
+  });
 
   return user;
 }
 
 export async function login({ emailOrUsername, email, password }) {
-  const loginEmail = email || emailOrUsername.trim();
+  const loginEmail = email || (await resolveLoginEmail(emailOrUsername));
+
+  await logout().catch(() => {});
 
   return account.createEmailPasswordSession({
     email: loginEmail,
@@ -85,14 +83,56 @@ export async function getUserProfile(authUserId) {
   return result.rows?.[0] || null;
 }
 
-export async function assertUsernameAvailable(username) {
+export async function updateUserProfile({
+  currentPassword,
+  newPassword,
+  nickname,
+  user,
+  username,
+}) {
+  const nextNickname = nickname.trim();
+  const nextUsername = username.trim();
+
+  await assertUsernameAvailable(nextUsername, user.$id);
+  await account.updateName({ name: nextNickname });
+
+  if (newPassword) {
+    await account.updatePassword({
+      password: newPassword,
+      oldPassword: currentPassword,
+    });
+  }
+
+  const profile = await tablesDB.updateRow({
+    databaseId: APPWRITE_DATABASE_ID,
+    tableId: APPWRITE_USERS_TABLE_ID,
+    rowId: user.profile?.$id || user.$id,
+    data: {
+      email: user.email,
+      username: nextUsername,
+      nickname: nextNickname,
+      authUserId: user.$id,
+    },
+  });
+
+  return {
+    ...(await account.get()),
+    profile,
+  };
+}
+
+export async function assertUsernameAvailable(username, currentAuthUserId = "") {
   const result = await tablesDB.listRows({
     databaseId: APPWRITE_DATABASE_ID,
     tableId: APPWRITE_USERS_TABLE_ID,
     queries: [Query.equal("username", username), Query.limit(1)],
   });
 
-  if (result.rows?.length) {
+  const duplicatedRow = result.rows?.find(
+    (row) => row.authUserId !== currentAuthUserId,
+  );
+
+  if (duplicatedRow) {
     throw new Error("이미 사용 중인 아이디입니다.");
   }
 }
@@ -107,4 +147,24 @@ export async function assertEmailAvailable(email) {
   if (result.rows?.length) {
     throw new Error("이미 가입된 이메일입니다.");
   }
+}
+
+async function resolveLoginEmail(emailOrUsername) {
+  const value = emailOrUsername.trim();
+
+  if (value.includes("@")) return value;
+
+  const result = await tablesDB.listRows({
+    databaseId: APPWRITE_DATABASE_ID,
+    tableId: APPWRITE_USERS_TABLE_ID,
+    queries: [Query.equal("username", value), Query.limit(1)],
+  });
+
+  const profile = result.rows?.[0];
+
+  if (!profile?.email) {
+    throw new Error("아이디 또는 비밀번호가 올바르지 않습니다.");
+  }
+
+  return profile.email;
 }

@@ -1,10 +1,13 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import PasswordToggleButton from '../components/PasswordToggleButton'
 import {
+  logout,
   sendSignupEmailToken,
   signUp,
   verifySignupEmailToken,
 } from '../services/auth'
+import { toKoreanErrorMessage } from '../services/errors'
 import './SignupPage.css'
 
 function SignupPage() {
@@ -23,6 +26,8 @@ function SignupPage() {
   const [isSendingCode, setIsSendingCode] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isVerifyingCode, setIsVerifyingCode] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showPasswordCheck, setShowPasswordCheck] = useState(false)
   const [statusMessage, setStatusMessage] = useState('')
 
   const handleChange = (e) => {
@@ -113,7 +118,7 @@ function SignupPage() {
     } catch (error) {
       setErrors((current) => ({
         ...current,
-        email: error.message || '인증번호 전송에 실패했습니다.',
+        email: toKoreanErrorMessage(error, '인증번호 전송에 실패했습니다.'),
       }))
     } finally {
       setIsSendingCode(false)
@@ -150,7 +155,7 @@ function SignupPage() {
     } catch (error) {
       setErrors((current) => ({
         ...current,
-        code: error.message || '인증번호 확인에 실패했습니다.',
+        code: toKoreanErrorMessage(error, '인증번호 확인에 실패했습니다.'),
       }))
     } finally {
       setIsVerifyingCode(false)
@@ -180,9 +185,10 @@ function SignupPage() {
         username: form.userId,
         nickname: form.nickname,
       })
-      navigate('/mypage')
+      await logout().catch(() => {})
+      navigate('/login')
     } catch (error) {
-      setStatusMessage(error.message || '회원가입에 실패했습니다.')
+      setStatusMessage(toKoreanErrorMessage(error, '회원가입에 실패했습니다.'))
     } finally {
       setIsSubmitting(false)
     }
@@ -300,14 +306,20 @@ function SignupPage() {
                   <label>비밀번호</label>
 
                   <div className="signup-field">
-                    <input
-                      className={errors.password ? 'error-input' : ''}
-                      name="password"
-                      type="password"
-                      placeholder="영문, 숫자, 특수문자 조합 8~20자"
-                      value={form.password}
-                      onChange={handleChange}
-                    />
+                    <div className="password-input-wrap">
+                      <input
+                        className={errors.password ? 'error-input' : ''}
+                        name="password"
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="영문, 숫자, 특수문자 조합 8~20자"
+                        value={form.password}
+                        onChange={handleChange}
+                      />
+                      <PasswordToggleButton
+                        isVisible={showPassword}
+                        onClick={() => setShowPassword((isVisible) => !isVisible)}
+                      />
+                    </div>
 
                     {errors.password && (
                       <p className="field-error">{errors.password}</p>
@@ -319,14 +331,22 @@ function SignupPage() {
                   <label>비밀번호 확인</label>
 
                   <div className="signup-field">
-                    <input
-                      className={errors.passwordCheck ? 'error-input' : ''}
-                      name="passwordCheck"
-                      type="password"
-                      placeholder="비밀번호를 다시 입력하세요"
-                      value={form.passwordCheck}
-                      onChange={handleChange}
-                    />
+                    <div className="password-input-wrap">
+                      <input
+                        className={errors.passwordCheck ? 'error-input' : ''}
+                        name="passwordCheck"
+                        type={showPasswordCheck ? 'text' : 'password'}
+                        placeholder="비밀번호를 다시 입력하세요"
+                        value={form.passwordCheck}
+                        onChange={handleChange}
+                      />
+                      <PasswordToggleButton
+                        isVisible={showPasswordCheck}
+                        onClick={() =>
+                          setShowPasswordCheck((isVisible) => !isVisible)
+                        }
+                      />
+                    </div>
 
                     {errors.passwordCheck && (
                       <p className="field-error">

@@ -298,6 +298,7 @@ function getBuildingNameForFacilityGroup(groupName) {
 }
 
 function Mainpage({
+  authActionLabel,
   page,
   selectedBuildingName,
   onOpenBoard,
@@ -321,6 +322,7 @@ function Mainpage({
         onOpenBoard={onOpenBoard}
         onOpenBuildings={onOpenBuildings}
         onOpenCampusMap={onOpenCampusMap}
+        authActionLabel={authActionLabel}
         onOpenLogin={onOpenLogin}
         onOpenMyPage={onOpenMyPage}
       />
@@ -354,7 +356,7 @@ function Mainpage({
             마이페이지
           </button>
           <button className="navLink navButtonLink" onClick={onOpenLogin} type="button">
-            로그인/회원가입
+            {authActionLabel}
           </button>
         </header>
 
@@ -412,7 +414,7 @@ function Mainpage({
             마이페이지
           </button>
           <button className="navLink navButtonLink" onClick={onOpenLogin} type="button">
-            로그인/회원가입
+            {authActionLabel}
           </button>
         </header>
 
@@ -483,7 +485,7 @@ function Mainpage({
             마이페이지
           </button>
           <button className="navLink navButtonLink" onClick={onOpenLogin} type="button">
-            로그인/회원가입
+            {authActionLabel}
           </button>
         </header>
 
@@ -678,6 +680,7 @@ function CampusIllustration() {
 }
 
 function MapPage({
+  authActionLabel,
   building,
   onOpenBoard,
   onOpenBuildings,
@@ -698,7 +701,7 @@ function MapPage({
           마이페이지
         </button>
         <button className="navLink navButtonLink" onClick={onOpenLogin} type="button">
-          로그인/회원가입
+          {authActionLabel}
         </button>
       </header>
 

@@ -61,7 +61,9 @@ function MyPage() {
         <Link to="/">메인페이지</Link>
         <Link to="/post">게시판</Link>
         <Link to="/mypage">마이페이지</Link>
-        <Link to="/login">로그인</Link>
+        <button className="nav-logout" type="button" onClick={handleLogout}>
+          로그아웃
+        </button>
       </header>
 
       <main className="mypage-main">
@@ -153,14 +155,9 @@ function MyPage() {
           </section>
         </Link>
 
-        <section className="bottom-grid">
-          <button className="small-card" type="button" onClick={handleLogout}>
-            <span>↪ 로그아웃</span>
-            <b>›</b>
-          </button>
-
+        <section className="bottom-grid single">
           <button
-            className="small-card danger"
+            className="small-card danger leave-card"
             type="button"
             onClick={handleLeaveRequest}
           >
