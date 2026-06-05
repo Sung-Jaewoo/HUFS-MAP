@@ -29,6 +29,17 @@ function MyPage() {
     navigate('/login')
   }
 
+  const handleLeaveRequest = async () => {
+    const confirmed = window.confirm(
+      '현재는 재가입 테스트를 위해 계정을 차단하지 않고 로그아웃만 처리합니다. 계속하시겠습니까?',
+    )
+
+    if (!confirmed) return
+
+    await logout().catch(() => {})
+    navigate('/login')
+  }
+
   if (isLoading) {
     return (
       <div className="mypage">
@@ -148,10 +159,14 @@ function MyPage() {
             <b>›</b>
           </button>
 
-          <div className="small-card danger">
+          <button
+            className="small-card danger"
+            type="button"
+            onClick={handleLeaveRequest}
+          >
             <span>⚤ 탈퇴하기</span>
             <b>›</b>
-          </div>
+          </button>
         </section>
       </main>
     </div>
