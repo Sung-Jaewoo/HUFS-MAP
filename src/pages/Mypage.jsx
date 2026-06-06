@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { getCurrentUser, logout } from '../services/auth'
+import { deleteCurrentUser, getCurrentUser, logout } from '../services/auth'
+import { toKoreanErrorMessage } from '../services/errors'
 import './Mypage.css'
 
 function MyPage() {
   const navigate = useNavigate()
   const [user, setUser] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     const loadUser = async () => {
@@ -25,8 +27,17 @@ function MyPage() {
   }, [navigate])
 
   const handleLogout = async () => {
-    await logout().catch(() => {})
-    navigate('/login')
+    setIsDeleting(true)
+
+    try {
+      await deleteCurrentUser(user.$id)
+      await logout().catch(() => {})
+      window.alert('회원 탈퇴가 완료되었습니다.')
+      navigate('/login')
+    } catch (error) {
+      window.alert(toKoreanErrorMessage(error, '회원 탈퇴를 처리하지 못했습니다.'))
+      setIsDeleting(false)
+    }
   }
 
   const handleLeaveRequest = async () => {
@@ -70,7 +81,7 @@ function MyPage() {
         <h1>마이페이지</h1>
 
         <p className="subtitle">
-          00대학교 캠퍼스 맵을 이용해주셔서 감사합니다.
+          저희 캠퍼스 맵을 이용해주셔서 감사합니다.
         </p>
 
         <section className="profile-card">
@@ -160,8 +171,9 @@ function MyPage() {
             className="small-card danger leave-card"
             type="button"
             onClick={handleLeaveRequest}
+            disabled={isDeleting}
           >
-            <span>⚤ 탈퇴하기</span>
+            <span>{isDeleting ? '탈퇴 처리 중' : '⚤ 탈퇴하기'}</span>
             <b>›</b>
           </button>
         </section>

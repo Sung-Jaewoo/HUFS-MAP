@@ -4,6 +4,7 @@ import {
   ID,
   Query,
   account,
+  functions,
   tablesDB,
 } from "../appwrite";
 
@@ -57,6 +58,14 @@ export async function login({ emailOrUsername, email, password }) {
 
 export async function logout() {
   return account.deleteSession({ sessionId: "current" });
+}
+
+export async function deleteCurrentUser(userId) {
+  return functions.createExecution({
+    functionId: "delete-user",
+    body: JSON.stringify({ userId }),
+    async: false,
+  });
 }
 
 export async function getCurrentUser() {

@@ -1,8 +1,13 @@
 import { useEffect, useState } from "react";
 import {
+  createComment,
   createPost,
   createReport,
+  deleteCommentDocument,
+  listFavoriteBuildings,
   listPosts,
+  toggleFavoriteBuilding,
+  updateCommentLike,
   updatePostFavorite,
 } from "../services/board";
 import { getCurrentUser } from "../services/auth";
@@ -105,15 +110,6 @@ function formatPostDate(createdAt) {
   return `${date.getMonth() + 1}/${date.getDate()}`;
 }
 
-function getUserDisplayName(user) {
-  return (
-    user?.profile?.nickname ||
-    user?.name ||
-    user?.email?.split("@")[0] ||
-    "익명"
-  );
-}
-
 function Postpage() {
   const [view, setView] = useState("list");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -131,6 +127,10 @@ function Postpage() {
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [reportDraft, setReportDraft] = useState("");
   const [reportMessage, setReportMessage] = useState("");
+  const [reportTarget, setReportTarget] = useState({
+    targetId: "",
+    targetType: "post",
+  });
   const [postError, setPostError] = useState("");
   const [postDraft, setPostDraft] = useState({
     title: "",
@@ -163,10 +163,14 @@ function Postpage() {
       setCurrentUser(user);
 
       try {
-        const loadedPosts = await listPosts({ currentUserId: user?.$id });
+        const [loadedPosts, loadedFavoriteBuildings] = await Promise.all([
+          listPosts({ currentUserId: user?.$id }),
+          listFavoriteBuildings({ userId: user?.$id }),
+        ]);
 
         if (isMounted) {
           setPosts(loadedPosts);
+          setFavoriteCategories(loadedFavoriteBuildings);
         }
       } catch (error) {
         if (isMounted) {
@@ -208,6 +212,7 @@ function Postpage() {
       setIsReportOpen(false);
       setReportDraft("");
       setReportMessage("");
+      setReportTarget({ targetId: "", targetType: "post" });
 
       if (Object.prototype.hasOwnProperty.call(state, "selectedCategory")) {
         setSelectedCategory(state.selectedCategory);
@@ -248,8 +253,6 @@ function Postpage() {
         )
         .slice(0, 3)
     : [];
-  const currentAuthorName = getUserDisplayName(currentUser);
-
   const openBoardPage = () => {
     setSelectedCategory(null);
     pushPageState({ view: "list", detailPostId: null, selectedCategory: null });
@@ -333,12 +336,23 @@ function Postpage() {
     );
   };
 
-  const toggleFavoriteCategory = (category) => {
-    setFavoriteCategories((currentCategories) =>
-      currentCategories.includes(category)
-        ? currentCategories.filter((item) => item !== category)
-        : [...currentCategories, category],
-    );
+  const toggleFavoriteCategory = async (category) => {
+    try {
+      const result = await toggleFavoriteBuilding({
+        building: category,
+        userId: currentUser?.$id,
+      });
+
+      setFavoriteCategories((currentCategories) =>
+        result.isFavorite
+          ? [...new Set([...currentCategories, category])]
+          : currentCategories.filter((item) => item !== category),
+      );
+    } catch (error) {
+      window.alert(
+        toKoreanErrorMessage(error, "즐겨찾기를 변경하지 못했습니다."),
+      );
+    }
   };
 
   const toggleLike = async (postId) => {
@@ -427,7 +441,7 @@ function Postpage() {
     );
   };
 
-  const submitDetailComment = (event) => {
+  const submitDetailComment = async (event) => {
     event.preventDefault();
 
     if (!detailCommentDraft.trim() || detailPostId === null) return;
@@ -437,70 +451,98 @@ function Postpage() {
       return;
     }
 
-    setPosts((currentPosts) =>
-      currentPosts.map((post) =>
-        post.id === detailPostId
-          ? {
-              ...post,
-              comments: [
-                ...post.comments,
-                {
-                  id: Date.now(),
-                  author: currentAuthorName,
-                  content: detailCommentDraft.trim(),
-                  likes: 0,
-                  liked: false,
-                  deleted: false,
-                  replies: [],
-                },
-              ],
-            }
-          : post,
-      ),
-    );
+    try {
+      const newComment = await createComment({
+        content: detailCommentDraft.trim(),
+        currentUser,
+        postId: detailPostId,
+      });
 
-    setDetailCommentDraft("");
-    setDetailCommentError("");
+      setPosts((currentPosts) =>
+        currentPosts.map((post) =>
+          post.id === detailPostId
+            ? {
+                ...post,
+                comments: [...post.comments, newComment],
+              }
+            : post,
+        ),
+      );
+
+      setDetailCommentDraft("");
+      setDetailCommentError("");
+    } catch (error) {
+      setDetailCommentError(
+        toKoreanErrorMessage(error, "댓글을 등록하지 못했습니다."),
+      );
+    }
   };
 
-  const toggleCommentLike = (commentId) => {
-    setPosts((currentPosts) =>
-      currentPosts.map((post) =>
-        post.id === detailPostId
-          ? {
-              ...post,
-              comments: post.comments.map((comment) =>
-                comment.id === commentId
-                  ? {
-                      ...comment,
-                      liked: !comment.liked,
-                      likes: comment.liked
-                        ? Math.max((comment.likes || 0) - 1, 0)
-                        : (comment.likes || 0) + 1,
-                    }
-                  : comment,
-              ),
-            }
-          : post,
-      ),
+  const toggleCommentLike = async (commentId) => {
+    const targetComment = detailPost?.comments.find(
+      (comment) => comment.id === commentId,
     );
+
+    if (!targetComment) return;
+
+    try {
+      const updatedComment = await updateCommentLike({
+        comment: targetComment,
+        currentUserId: currentUser?.$id,
+      });
+
+      setPosts((currentPosts) =>
+        currentPosts.map((post) =>
+          post.id === detailPostId
+            ? {
+                ...post,
+                comments: post.comments.map((comment) =>
+                  comment.id === commentId
+                    ? { ...updatedComment, replies: comment.replies || [] }
+                    : comment,
+                ),
+              }
+            : post,
+        ),
+      );
+    } catch (error) {
+      window.alert(toKoreanErrorMessage(error, "댓글 좋아요를 변경하지 못했습니다."));
+    }
   };
 
-  const deleteComment = (commentId) => {
-    setPosts((currentPosts) =>
-      currentPosts.map((post) =>
-        post.id === detailPostId
-          ? {
-              ...post,
-              comments: post.comments.map((comment) =>
-                comment.id === commentId
-                  ? { ...comment, deleted: true, liked: false, likes: 0 }
-                  : comment,
-              ),
-            }
-          : post,
-      ),
+  const deleteComment = async (commentId) => {
+    const targetComment = detailPost?.comments.find(
+      (comment) => comment.id === commentId,
     );
+
+    if (!targetComment) return;
+
+    try {
+      const deletedComment = await deleteCommentDocument({
+        comment: targetComment,
+      });
+
+      setPosts((currentPosts) =>
+        currentPosts.map((post) =>
+          post.id === detailPostId
+            ? {
+                ...post,
+                comments: post.comments.map((comment) =>
+                  comment.id === commentId
+                    ? {
+                        ...comment,
+                        ...deletedComment,
+                        replies: comment.replies || [],
+                      }
+                    : comment,
+                ),
+              }
+            : post,
+        ),
+      );
+    } catch (error) {
+      window.alert(toKoreanErrorMessage(error, "댓글을 삭제하지 못했습니다."));
+    }
   };
 
   const openReplyForm = (commentId) => {
@@ -516,7 +558,7 @@ function Postpage() {
     setReplyError(value.length > COMMENT_LIMIT ? text.commentLengthError : "");
   };
 
-  const submitReply = (event, commentId) => {
+  const submitReply = async (event, commentId) => {
     event.preventDefault();
 
     if (!replyDraft.trim() || detailPostId === null) return;
@@ -526,96 +568,124 @@ function Postpage() {
       return;
     }
 
-    setPosts((currentPosts) =>
-      currentPosts.map((post) =>
-        post.id === detailPostId
-          ? {
-              ...post,
-              comments: post.comments.map((comment) =>
-                comment.id === commentId
-                  ? {
-                      ...comment,
-                      replies: [
-                        ...(comment.replies || []),
-                        {
-                          id: Date.now(),
-                          author: currentAuthorName,
-                          content: replyDraft.trim(),
-                          likes: 0,
-                          liked: false,
-                          deleted: false,
-                        },
-                      ],
-                    }
-                  : comment,
-              ),
-            }
-          : post,
-      ),
-    );
+    try {
+      const newReply = await createComment({
+        content: replyDraft.trim(),
+        currentUser,
+        parentCommentId: commentId,
+        postId: detailPostId,
+      });
 
-    setReplyTargetId(null);
-    setReplyDraft("");
-    setReplyError("");
+      setPosts((currentPosts) =>
+        currentPosts.map((post) =>
+          post.id === detailPostId
+            ? {
+                ...post,
+                comments: post.comments.map((comment) =>
+                  comment.id === commentId
+                    ? {
+                        ...comment,
+                        replies: [...(comment.replies || []), newReply],
+                      }
+                    : comment,
+                ),
+              }
+            : post,
+        ),
+      );
+
+      setReplyTargetId(null);
+      setReplyDraft("");
+      setReplyError("");
+    } catch (error) {
+      setReplyError(toKoreanErrorMessage(error, "답글을 등록하지 못했습니다."));
+    }
   };
 
-  const toggleReplyLike = (commentId, replyId) => {
-    setPosts((currentPosts) =>
-      currentPosts.map((post) =>
-        post.id === detailPostId
-          ? {
-              ...post,
-              comments: post.comments.map((comment) =>
-                comment.id === commentId
-                  ? {
-                      ...comment,
-                      replies: (comment.replies || []).map((reply) =>
-                        reply.id === replyId
-                          ? {
-                              ...reply,
-                              liked: !reply.liked,
-                              likes: reply.liked
-                                ? Math.max((reply.likes || 0) - 1, 0)
-                                : (reply.likes || 0) + 1,
-                            }
-                          : reply,
-                      ),
-                    }
-                  : comment,
-              ),
-            }
-          : post,
-      ),
+  const toggleReplyLike = async (commentId, replyId) => {
+    const parentComment = detailPost?.comments.find(
+      (comment) => comment.id === commentId,
     );
+    const targetReply = parentComment?.replies?.find(
+      (reply) => reply.id === replyId,
+    );
+
+    if (!targetReply) return;
+
+    try {
+      const updatedReply = await updateCommentLike({
+        comment: targetReply,
+        currentUserId: currentUser?.$id,
+      });
+
+      setPosts((currentPosts) =>
+        currentPosts.map((post) =>
+          post.id === detailPostId
+            ? {
+                ...post,
+                comments: post.comments.map((comment) =>
+                  comment.id === commentId
+                    ? {
+                        ...comment,
+                        replies: (comment.replies || []).map((reply) =>
+                          reply.id === replyId ? updatedReply : reply,
+                        ),
+                      }
+                    : comment,
+                ),
+              }
+            : post,
+        ),
+      );
+    } catch (error) {
+      window.alert(toKoreanErrorMessage(error, "답글 좋아요를 변경하지 못했습니다."));
+    }
   };
 
-  const deleteReply = (commentId, replyId) => {
-    setPosts((currentPosts) =>
-      currentPosts.map((post) =>
-        post.id === detailPostId
-          ? {
-              ...post,
-              comments: post.comments.map((comment) =>
-                comment.id === commentId
-                  ? {
-                      ...comment,
-                      replies: (comment.replies || []).map((reply) =>
-                        reply.id === replyId
-                          ? { ...reply, deleted: true, liked: false, likes: 0 }
-                          : reply,
-                      ),
-                    }
-                  : comment,
-              ),
-            }
-          : post,
-      ),
+  const deleteReply = async (commentId, replyId) => {
+    const parentComment = detailPost?.comments.find(
+      (comment) => comment.id === commentId,
     );
+    const targetReply = parentComment?.replies?.find(
+      (reply) => reply.id === replyId,
+    );
+
+    if (!targetReply) return;
+
+    try {
+      const deletedReply = await deleteCommentDocument({ comment: targetReply });
+
+      setPosts((currentPosts) =>
+        currentPosts.map((post) =>
+          post.id === detailPostId
+            ? {
+                ...post,
+                comments: post.comments.map((comment) =>
+                  comment.id === commentId
+                    ? {
+                        ...comment,
+                        replies: (comment.replies || []).map((reply) =>
+                          reply.id === replyId ? deletedReply : reply,
+                        ),
+                      }
+                    : comment,
+                ),
+              }
+            : post,
+        ),
+      );
+    } catch (error) {
+      window.alert(toKoreanErrorMessage(error, "답글을 삭제하지 못했습니다."));
+    }
   };
 
-  const openReportPopup = () => {
+  const openReportPopup = (target = {}) => {
     setReportDraft("");
     setReportMessage("");
+    setReportTarget({
+      targetId: target.targetId || detailPostId,
+      targetType: target.targetType || "post",
+    });
     setIsReportOpen(true);
   };
 
@@ -623,6 +693,7 @@ function Postpage() {
     setIsReportOpen(false);
     setReportDraft("");
     setReportMessage("");
+    setReportTarget({ targetId: "", targetType: "post" });
   };
 
   const submitReport = async (event) => {
@@ -640,8 +711,8 @@ function Postpage() {
 
     try {
       await createReport({
-        targetType: "post",
-        targetId: detailPostId,
+        targetType: reportTarget.targetType,
+        targetId: reportTarget.targetId || detailPostId,
         reason: reportDraft,
         reporterId: currentUser.$id,
       });
@@ -739,6 +810,7 @@ function Postpage() {
             onReplyLike={toggleReplyLike}
             onReplyOpen={openReplyForm}
             onReplySubmit={submitReply}
+            currentUserId={currentUser?.$id || ""}
             post={detailPost}
             relatedPosts={detailRelatedPosts}
             replyDraft={replyDraft}
@@ -995,6 +1067,7 @@ function DetailPostView({
   onReplyLike,
   onReplyOpen,
   onReplySubmit,
+  currentUserId,
   post,
   relatedPosts,
   replyDraft,
@@ -1049,7 +1122,10 @@ function DetailPostView({
 
         <div className="detailCommentList">
           {post.comments.length > 0 ? (
-            post.comments.map((comment) => (
+            post.comments.map((comment) => {
+              const isMyComment = currentUserId && comment.authorId === currentUserId;
+
+              return (
               <div className="commentItem" key={comment.id}>
                 <div className="commentAvatar">
                   {comment.deleted ? "-" : comment.author.slice(0, 1)}
@@ -1082,23 +1158,37 @@ function DetailPostView({
                           <span className="commentIcon miniCommentIcon" />
                           {text.reply}
                         </button>
-                        <button onClick={onReportOpen} type="button">
+                        <button
+                          onClick={() =>
+                            onReportOpen({
+                              targetId: comment.id,
+                              targetType: "comment",
+                            })
+                          }
+                          type="button"
+                        >
                           <FlagIcon />
                           {text.report}
                         </button>
-                        <button
-                          onClick={() => onCommentDelete(comment.id)}
-                          type="button"
-                        >
-                          {text.delete}
-                        </button>
+                        {isMyComment && (
+                          <button
+                            onClick={() => onCommentDelete(comment.id)}
+                            type="button"
+                          >
+                            {text.delete}
+                          </button>
+                        )}
                       </div>
                     </>
                   )}
 
                   {(comment.replies || []).length > 0 && (
                     <div className="replyList">
-                      {(comment.replies || []).map((reply) => (
+                      {(comment.replies || []).map((reply) => {
+                        const isMyReply =
+                          currentUserId && reply.authorId === currentUserId;
+
+                        return (
                         <div className="replyItem" key={reply.id}>
                           <div className="commentAvatar">
                             {reply.deleted ? "-" : reply.author.slice(0, 1)}
@@ -1130,24 +1220,35 @@ function DetailPostView({
                                     <HeartIcon />
                                     {text.likeLabel} {reply.likes || 0}
                                   </button>
-                                  <button onClick={onReportOpen} type="button">
-                                    <FlagIcon />
-                                    {text.report}
-                                  </button>
                                   <button
                                     onClick={() =>
-                                      onReplyDelete(comment.id, reply.id)
+                                      onReportOpen({
+                                        targetId: reply.id,
+                                        targetType: "comment",
+                                      })
                                     }
                                     type="button"
                                   >
-                                    {text.delete}
+                                    <FlagIcon />
+                                    {text.report}
                                   </button>
+                                  {isMyReply && (
+                                    <button
+                                      onClick={() =>
+                                        onReplyDelete(comment.id, reply.id)
+                                      }
+                                      type="button"
+                                    >
+                                      {text.delete}
+                                    </button>
+                                  )}
                                 </div>
                               </>
                             )}
                           </div>
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
 
@@ -1178,7 +1279,8 @@ function DetailPostView({
                   )}
                 </div>
               </div>
-            ))
+              );
+            })
           ) : (
             <p className="emptyComments">{text.noComments}</p>
           )}

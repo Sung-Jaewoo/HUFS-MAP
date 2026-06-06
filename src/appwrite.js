@@ -1,4 +1,13 @@
-import { Account, Client, Databases, ID, Query, Storage, TablesDB } from "appwrite";
+import {
+  Account,
+  Client,
+  Databases,
+  Functions,
+  ID,
+  Query,
+  Storage,
+  TablesDB,
+} from "appwrite";
 
 const client = new Client()
   .setEndpoint(import.meta.env.VITE_APPWRITE_ENDPOINT)
@@ -22,6 +31,8 @@ export const APPWRITE_BOARD_DATABASE_ID =
   import.meta.env.VITE_APPWRITE_BOARD_DATABASE_ID || "post";
 export const APPWRITE_POST_COLLECTION_ID =
   import.meta.env.VITE_APPWRITE_POST_COLLECTION_ID || "post";
+export const APPWRITE_COMMENTS_COLLECTION_ID =
+  import.meta.env.VITE_APPWRITE_COMMENTS_COLLECTION_ID || "comments";
 export const APPWRITE_REPORT_COLLECTION_ID =
   import.meta.env.VITE_APPWRITE_REPORT_COLLECTION_ID || "repost";
 export const APPWRITE_BOARD_BUCKET_ID =
@@ -29,6 +40,7 @@ export const APPWRITE_BOARD_BUCKET_ID =
 
 export const account = new Account(client);
 export const databases = new Databases(client);
+export const functions = new Functions(client);
 export const tablesDB = new TablesDB(client);
 export const storage = new Storage(client);
 export const boardDatabases = new Databases(boardClient);
