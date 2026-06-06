@@ -341,6 +341,7 @@ function Mainpage({
       }
 
       const loadedFavoriteBuildings = await listFavoriteBuildings({
+        profile: user.profile,
         userId: user.$id,
       }).catch(() => []);
 
@@ -369,6 +370,7 @@ function Mainpage({
     try {
       const result = await toggleFavoriteBuilding({
         building: buildingName,
+        profile: user.profile,
         userId: user.$id,
       });
 
@@ -376,6 +378,17 @@ function Mainpage({
         result.isFavorite
           ? [...new Set([...currentFavorites, buildingName])]
           : currentFavorites.filter((favorite) => favorite !== buildingName),
+      );
+      setCurrentUser((current) =>
+        current
+          ? {
+              ...current,
+              profile: {
+                ...(current.profile || {}),
+                favoriteBuildings: result.favoriteBuildings,
+              },
+            }
+          : current,
       );
     } catch (error) {
       window.alert(toKoreanErrorMessage(error, "즐겨찾기를 변경하지 못했습니다."));

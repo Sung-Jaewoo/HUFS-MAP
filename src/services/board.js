@@ -88,12 +88,12 @@ const BUILDING_DETAIL_BY_KEY = {
   },
 };
 
-export async function listFavoriteBuildings({ userId }) {
+export async function listFavoriteBuildings({ profile, userId }) {
   if (!userId) return [];
 
-  const profile = await getUserProfileRow(userId);
+  const userProfile = profile || (await getUserProfileRow(userId));
 
-  return (profile.favoriteBuildings || [])
+  return (userProfile.favoriteBuildings || [])
     .map((buildingKey) => BUILDING_LABEL_BY_KEY[buildingKey] || buildingKey)
     .filter(Boolean);
 }
@@ -122,14 +122,14 @@ export async function listFavoriteBuildingCards({ userId }) {
     .filter((building) => building.name);
 }
 
-export async function toggleFavoriteBuilding({ building, userId }) {
+export async function toggleFavoriteBuilding({ building, profile, userId }) {
   if (!userId) {
     throw new Error("로그인 후 이용해주세요.");
   }
 
-  const profile = await getUserProfileRow(userId);
+  const userProfile = profile || (await getUserProfileRow(userId));
   const buildingKey = getBuildingKey(building);
-  const favoriteBuildingKeys = profile.favoriteBuildings || [];
+  const favoriteBuildingKeys = userProfile.favoriteBuildings || [];
   const isFavorite = favoriteBuildingKeys.includes(buildingKey);
   const nextFavoriteBuildingKeys = isFavorite
     ? favoriteBuildingKeys.filter((key) => key !== buildingKey)
@@ -138,13 +138,17 @@ export async function toggleFavoriteBuilding({ building, userId }) {
   await tablesDB.updateRow({
     databaseId: APPWRITE_DATABASE_ID,
     tableId: APPWRITE_USERS_TABLE_ID,
-    rowId: profile.$id,
+    rowId: userProfile.$id,
     data: {
       favoriteBuildings: nextFavoriteBuildingKeys,
     },
   });
 
-  return { building, isFavorite: !isFavorite };
+  return {
+    building,
+    favoriteBuildings: nextFavoriteBuildingKeys,
+    isFavorite: !isFavorite,
+  };
 }
 
 export async function listPosts({ currentUserId } = {}) {
