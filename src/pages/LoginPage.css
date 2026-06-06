@@ -5,14 +5,14 @@
 }
 
 .top-nav {
-  height: 42px;
+  height: 56px;
   background: white;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 110px;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 17px;
+  font-weight: 800;
   box-shadow: 0 1px 8px rgba(0, 0, 0, 0.04);
 }
 
@@ -22,7 +22,7 @@
 }
 
 .login-main {
-  min-height: calc(100vh - 42px);
+  min-height: calc(100vh - 56px);
   position: relative;
   display: flex;
   justify-content: center;
@@ -132,24 +132,20 @@
   position: relative;
 }
 
-.password-box span {
-  position: absolute;
-  right: 14px;
-  top: 11px;
-  color: #6b7280;
-  font-size: 13px;
+.password-box input {
+  padding-right: 50px;
+}
+
+.password-box .password-toggle {
+  right: 9px;
 }
 
 .form-options {
   margin: 10px 0 24px 90px;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   font-size: 12px;
-}
-
-.form-options label {
-  color: #6b7280;
 }
 
 .form-options a,

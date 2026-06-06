@@ -2,6 +2,12 @@ import { useEffect, useState } from "react";
 import L from "leaflet";
 import { MapContainer, Marker, Popup, TileLayer, ZoomControl, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import { getCurrentUser } from "../services/auth";
+import {
+  listFavoriteBuildings,
+  toggleFavoriteBuilding,
+} from "../services/board";
+import { toKoreanErrorMessage } from "../services/errors";
 import "./Mainpage.css";
 
 const campusCenter = [37.3379, 127.2688];
@@ -298,6 +304,7 @@ function getBuildingNameForFacilityGroup(groupName) {
 }
 
 function Mainpage({
+  authActionLabel,
   page,
   selectedBuildingName,
   onOpenBoard,
@@ -310,9 +317,83 @@ function Mainpage({
   onOpenCampusMap,
 }) {
   const [footerModal, setFooterModal] = useState(null);
+  const [favoriteBuildings, setFavoriteBuildings] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
   const selectedBuilding =
     buildings.find((building) => building.name === selectedBuildingName) ||
     buildings[0];
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadFavoriteBuildings = async () => {
+      if (page !== "buildings") return;
+
+      const user = await getCurrentUser();
+
+      if (!isMounted) return;
+
+      setCurrentUser(user);
+
+      if (!user) {
+        setFavoriteBuildings([]);
+        return;
+      }
+
+      const loadedFavoriteBuildings = await listFavoriteBuildings({
+        profile: user.profile,
+        userId: user.$id,
+      }).catch(() => []);
+
+      if (isMounted) {
+        setFavoriteBuildings(loadedFavoriteBuildings);
+      }
+    };
+
+    loadFavoriteBuildings();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [page]);
+
+  const handleFavoriteBuilding = async (buildingName) => {
+    const user = currentUser || (await getCurrentUser());
+
+    if (!user) {
+      onOpenLogin();
+      return;
+    }
+
+    setCurrentUser(user);
+
+    try {
+      const result = await toggleFavoriteBuilding({
+        building: buildingName,
+        profile: user.profile,
+        userId: user.$id,
+      });
+
+      setFavoriteBuildings((currentFavorites) =>
+        result.isFavorite
+          ? [...new Set([...currentFavorites, buildingName])]
+          : currentFavorites.filter((favorite) => favorite !== buildingName),
+      );
+      setCurrentUser((current) =>
+        current
+          ? {
+              ...current,
+              profile: {
+                ...(current.profile || {}),
+                favoriteBuildings: result.favoriteBuildings,
+              },
+            }
+          : current,
+      );
+    } catch (error) {
+      window.alert(toKoreanErrorMessage(error, "즐겨찾기를 변경하지 못했습니다."));
+    }
+  };
 
   if (page === "map") {
     return (
@@ -321,6 +402,7 @@ function Mainpage({
         onOpenBoard={onOpenBoard}
         onOpenBuildings={onOpenBuildings}
         onOpenCampusMap={onOpenCampusMap}
+        authActionLabel={authActionLabel}
         onOpenLogin={onOpenLogin}
         onOpenMyPage={onOpenMyPage}
       />
@@ -354,7 +436,7 @@ function Mainpage({
             마이페이지
           </button>
           <button className="navLink navButtonLink" onClick={onOpenLogin} type="button">
-            로그인/회원가입
+            {authActionLabel}
           </button>
         </header>
 
@@ -378,6 +460,18 @@ function Mainpage({
                 <div className="buildingInfo">
                   <div className="buildingTitleRow">
                     <h2>{building.name}</h2>
+                    <button
+                      aria-label={`${building.name} 즐겨찾기`}
+                      className={
+                        favoriteBuildings.includes(building.name)
+                          ? "buildingFavoriteButton active"
+                          : "buildingFavoriteButton"
+                      }
+                      onClick={() => handleFavoriteBuilding(building.name)}
+                      type="button"
+                    >
+                      ★
+                    </button>
                   </div>
                   <span>{building.tag}</span>
                   <p>{building.description}</p>
@@ -412,7 +506,7 @@ function Mainpage({
             마이페이지
           </button>
           <button className="navLink navButtonLink" onClick={onOpenLogin} type="button">
-            로그인/회원가입
+            {authActionLabel}
           </button>
         </header>
 
@@ -483,7 +577,7 @@ function Mainpage({
             마이페이지
           </button>
           <button className="navLink navButtonLink" onClick={onOpenLogin} type="button">
-            로그인/회원가입
+            {authActionLabel}
           </button>
         </header>
 
@@ -678,6 +772,7 @@ function CampusIllustration() {
 }
 
 function MapPage({
+  authActionLabel,
   building,
   onOpenBoard,
   onOpenBuildings,
@@ -698,7 +793,7 @@ function MapPage({
           마이페이지
         </button>
         <button className="navLink navButtonLink" onClick={onOpenLogin} type="button">
-          로그인/회원가입
+          {authActionLabel}
         </button>
       </header>
 

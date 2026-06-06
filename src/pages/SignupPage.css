@@ -5,14 +5,14 @@
 }
 
 .top-nav {
-  height: 42px;
+  height: 56px;
   background: white;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 110px;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 17px;
+  font-weight: 800;
   box-shadow: 0 1px 8px rgba(0, 0, 0, 0.04);
 }
 
@@ -22,7 +22,7 @@
 }
 
 .signup-main {
-  min-height: calc(100vh - 42px);
+  min-height: calc(100vh - 56px);
   position: relative;
   display: flex;
   justify-content: center;
@@ -132,6 +132,18 @@
   font-size: 12px;
   outline: none;
   box-sizing: border-box;
+}
+
+.password-input-wrap {
+  position: relative;
+}
+
+.password-input-wrap input {
+  padding-right: 48px;
+}
+
+.signup-field .password-toggle {
+  right: 6px;
 }
 
 .signup-small-btn {

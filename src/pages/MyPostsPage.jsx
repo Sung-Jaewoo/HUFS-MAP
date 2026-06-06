@@ -1,94 +1,88 @@
-import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { deletePostDocument, listMyPosts } from "../services/board";
+import { getCurrentUser, logout } from "../services/auth";
+import { toKoreanErrorMessage } from "../services/errors";
 import "./MyPostsPage.css";
 
-const currentUser = {
-  name: "홍길동",
-  role: "학생",
-  department: "컴퓨터공학과",
-  email: "honggildong@ooo.ac.kr",
-};
-
-const mockPosts = [
-  {
-    id: 24,
-    title: "2024학년도 2학기 강의 추천해주세요!",
-    board: "자유게시판",
-    createdAt: "2024.05.20",
-    views: 123,
-    status: "공개",
-  },
-  {
-    id: 23,
-    title: "중앙도서관 좌석 추천",
-    board: "캠퍼스 생활",
-    createdAt: "2024.05.18",
-    views: 98,
-    status: "공개",
-  },
-  {
-    id: 22,
-    title: "기숙사 관련 질문 있습니다.",
-    board: "질문게시판",
-    createdAt: "2024.05.15",
-    views: 76,
-    status: "답변 대기",
-  },
-  {
-    id: 21,
-    title: "맛집 정보 공유해요",
-    board: "자유게시판",
-    createdAt: "2024.05.10",
-    views: 132,
-    status: "공개",
-  },
-  {
-    id: 20,
-    title: "동아리 모집 후기",
-    board: "동아리",
-    createdAt: "2024.05.08",
-    views: 64,
-    status: "공개",
-  },
-];
-
 function MyPostsPage() {
-  const [boardFilter, setBoardFilter] = useState("전체 게시판");
+  const navigate = useNavigate();
+  const [boardFilter, setBoardFilter] = useState("전체");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   const [keyword, setKeyword] = useState("");
-  const [posts, setPosts] = useState(mockPosts);
+  const [posts, setPosts] = useState([]);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const loadPosts = async () => {
+      const currentUser = await getCurrentUser();
+
+      if (!currentUser) {
+        navigate("/login");
+        return;
+      }
+
+      setUser(currentUser);
+
+      try {
+        setPosts(await listMyPosts({ currentUserId: currentUser.$id }));
+      } catch (loadError) {
+        setError(toKoreanErrorMessage(loadError, "내가 쓴 글을 불러오지 못했습니다."));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadPosts();
+  }, [navigate]);
 
   const boards = useMemo(
-    () => ["전체 게시판", ...new Set(mockPosts.map((post) => post.board))],
-    [],
+    () => ["전체", ...new Set(posts.map((post) => post.category || "게시판"))],
+    [posts],
   );
 
   const filteredPosts = posts.filter((post) => {
-    const matchesBoard = boardFilter === "전체 게시판" || post.board === boardFilter;
-    const matchesKeyword = post.title.toLowerCase().includes(keyword.trim().toLowerCase());
+    const board = post.category || "게시판";
+    const matchesBoard = boardFilter === "전체" || board === boardFilter;
+    const searchText = `${post.title} ${post.content}`.toLowerCase();
+    const matchesKeyword = searchText.includes(keyword.trim().toLowerCase());
 
     return matchesBoard && matchesKeyword;
   });
 
-  const removePost = (postId) => {
-    if (window.confirm("이 글을 목록에서 삭제하시겠습니까?")) {
-      setPosts((current) => current.filter((post) => post.id !== postId));
+  const handleLogout = async () => {
+    await logout().catch(() => {});
+    navigate("/login");
+  };
+
+  const removePost = async (postId) => {
+    if (!window.confirm("이 게시글을 삭제하시겠습니까?")) return;
+
+    try {
+      await deletePostDocument({ postId });
+      setPosts((currentPosts) => currentPosts.filter((post) => post.id !== postId));
+    } catch (deleteError) {
+      window.alert(toKoreanErrorMessage(deleteError, "게시글을 삭제하지 못했습니다."));
     }
   };
 
   return (
     <div className="posts-page">
-      <Header />
+      <Header onLogout={handleLogout} />
 
       <div className="posts-layout">
-        <Sidebar active="posts" />
+        <Sidebar active="posts" user={user} />
 
         <main className="posts-main">
           <h1>내가 쓴 글</h1>
-
-          <p>작성한 게시글을 검색하고, 상세 이동과 삭제 흐름을 미리 확인할 수 있습니다.</p>
+          <p>내가 작성한 게시글을 확인하고 관리할 수 있습니다.</p>
 
           <section className="search-box">
-            <select value={boardFilter} onChange={(event) => setBoardFilter(event.target.value)}>
+            <select
+              onChange={(event) => setBoardFilter(event.target.value)}
+              value={boardFilter}
+            >
               {boards.map((board) => (
                 <option key={board}>{board}</option>
               ))}
@@ -96,13 +90,17 @@ function MyPostsPage() {
 
             <input
               onChange={(event) => setKeyword(event.target.value)}
-              placeholder="제목을 검색하세요"
+              placeholder="제목이나 내용을 검색하세요"
               value={keyword}
             />
           </section>
 
           <section className="table-card">
-            {filteredPosts.length > 0 ? (
+            {isLoading ? (
+              <EmptyState text="내가 쓴 글을 불러오는 중입니다." />
+            ) : error ? (
+              <EmptyState text={error} />
+            ) : filteredPosts.length > 0 ? (
               <table>
                 <thead>
                   <tr>
@@ -111,28 +109,32 @@ function MyPostsPage() {
                     <th>게시판</th>
                     <th>상태</th>
                     <th>작성일</th>
-                    <th>조회수</th>
+                    <th>좋아요</th>
                     <th>관리</th>
                   </tr>
                 </thead>
 
                 <tbody>
-                  {filteredPosts.map((post) => (
+                  {filteredPosts.map((post, index) => (
                     <tr key={post.id}>
-                      <td>{post.id}</td>
+                      <td>{filteredPosts.length - index}</td>
                       <td>
                         <Link className="title-link" to="/post">
-                          {post.title}
+                          {post.title || "제목 없음"}
                         </Link>
                       </td>
-                      <td>{post.board}</td>
+                      <td>{post.category || "게시판"}</td>
                       <td>
-                        <span className="status-badge">{post.status}</span>
+                        <span className="status-badge">공개</span>
                       </td>
-                      <td>{post.createdAt}</td>
-                      <td>{post.views}</td>
+                      <td>{formatDate(post.createdAt)}</td>
+                      <td>{post.likes}</td>
                       <td>
-                        <button className="table-action" onClick={() => removePost(post.id)} type="button">
+                        <button
+                          className="table-action"
+                          onClick={() => removePost(post.id)}
+                          type="button"
+                        >
                           삭제
                         </button>
                       </td>
@@ -141,20 +143,8 @@ function MyPostsPage() {
                 </tbody>
               </table>
             ) : (
-              <EmptyState text="조건에 맞는 작성글이 없습니다." />
+              <EmptyState text="조건에 맞는 작성 글이 없습니다." />
             )}
-
-            <div className="pagination">
-              <button disabled type="button">
-                이전
-              </button>
-              <button className="active-page" type="button">
-                1
-              </button>
-              <button disabled type="button">
-                다음
-              </button>
-            </div>
           </section>
         </main>
       </div>
@@ -162,28 +152,35 @@ function MyPostsPage() {
   );
 }
 
-function Header() {
+function Header({ onLogout }) {
   return (
     <header className="top-nav">
       <Link to="/">메인페이지</Link>
       <Link to="/post">게시판</Link>
       <Link to="/mypage">마이페이지</Link>
-      <Link to="/">로그아웃</Link>
+      <button className="nav-logout" onClick={onLogout} type="button">
+        로그아웃
+      </button>
     </header>
   );
 }
 
-function Sidebar({ active }) {
+function Sidebar({ active, user }) {
+  const profile = user?.profile || {};
+  const displayName = profile.nickname || user?.name || "사용자";
+  const username = profile.username || "학생";
+  const email = profile.email || user?.email || "";
+
   return (
     <aside className="posts-sidebar">
       <div className="side-profile">
-        <div className="side-avatar">홍</div>
+        <div className="side-avatar">{displayName.slice(0, 1)}</div>
 
         <div>
-          <strong>{currentUser.name}</strong>
-          <span>{currentUser.role}</span>
-          <p>{currentUser.department}</p>
-          <p>{currentUser.email}</p>
+          <strong>{displayName}</strong>
+          <span>{username}</span>
+          <p>HUFS MAP 회원</p>
+          <p>{email}</p>
         </div>
       </div>
 
@@ -205,6 +202,15 @@ function Sidebar({ active }) {
 
 function EmptyState({ text }) {
   return <div className="empty-state">{text}</div>;
+}
+
+function formatDate(value) {
+  if (!value) return "-";
+
+  return new Date(value).toLocaleDateString("ko-KR", {
+    month: "2-digit",
+    day: "2-digit",
+  });
 }
 
 export default MyPostsPage;

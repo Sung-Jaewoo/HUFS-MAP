@@ -812,6 +812,35 @@ button {
   font-weight: 900;
 }
 
+.buildingFavoriteButton {
+  width: 42px !important;
+  height: 42px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  flex: 0 0 auto;
+  display: grid !important;
+  place-items: center;
+  color: #a5adba !important;
+  background: #f4f6fb !important;
+  border: 1px solid #e3e7f0 !important;
+  border-radius: 999px;
+  font-size: 22px !important;
+  line-height: 1;
+  font-weight: 900 !important;
+}
+
+.buildingFavoriteButton.active {
+  color: #f5b400 !important;
+  background: #fff7d6 !important;
+  border-color: #ffe49a !important;
+  box-shadow: 0 8px 18px rgba(245, 180, 0, 0.22);
+}
+
+.buildingFavoriteButton:hover {
+  color: #f5b400 !important;
+  background: #fff7d6 !important;
+}
+
 .buildingInfo > span {
   width: fit-content;
   margin-top: 26px;
