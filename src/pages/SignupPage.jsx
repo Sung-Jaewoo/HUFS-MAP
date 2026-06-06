@@ -1,8 +1,17 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import PasswordToggleButton from '../components/PasswordToggleButton'
+import {
+  logout,
+  sendSignupEmailToken,
+  signUp,
+  verifySignupEmailToken,
+} from '../services/auth'
+import { toKoreanErrorMessage } from '../services/errors'
 import './SignupPage.css'
 
 function SignupPage() {
+  const navigate = useNavigate()
   const [form, setForm] = useState({
     email: '',
     code: '',
@@ -11,8 +20,15 @@ function SignupPage() {
     passwordCheck: '',
     nickname: '',
   })
-
+  const [emailTokenUserId, setEmailTokenUserId] = useState('')
   const [errors, setErrors] = useState({})
+  const [isEmailVerified, setIsEmailVerified] = useState(false)
+  const [isSendingCode, setIsSendingCode] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isVerifyingCode, setIsVerifyingCode] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showPasswordCheck, setShowPasswordCheck] = useState(false)
+  const [statusMessage, setStatusMessage] = useState('')
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -21,27 +37,47 @@ function SignupPage() {
       ...form,
       [name]: value,
     })
-
     setErrors({
       ...errors,
       [name]: '',
     })
+    setStatusMessage('')
+
+    if (name === 'email') {
+      setEmailTokenUserId('')
+      setIsEmailVerified(false)
+    }
+
+    if (name === 'code') {
+      setIsEmailVerified(false)
+    }
+  }
+
+  const validateEmailStep = () => {
+    const newErrors = {}
+
+    if (!form.email.endsWith('@hufs.ac.kr')) {
+      newErrors.email = '학교 이메일을 입력해주세요.'
+    }
+
+    setErrors(newErrors)
+
+    return Object.keys(newErrors).length === 0
   }
 
   const validate = () => {
     const newErrors = {}
 
     if (!form.email.endsWith('@hufs.ac.kr')) {
-      newErrors.email =
-        '해당 이메일은 존재하지 않습니다. 학교 이메일을 확인해주세요.'
+      newErrors.email = '학교 이메일을 입력해주세요.'
+    }
+
+    if (!/^[A-Za-z0-9]{4,20}$/.test(form.userId)) {
+      newErrors.userId = '아이디는 영문, 숫자 조합 4~20자로 입력해주세요.'
     }
 
     if (form.code.length !== 6) {
       newErrors.code = '인증번호 6자리를 입력해주세요.'
-    }
-
-    if (form.userId === 'testuser') {
-      newErrors.userId = '이미 사용 중인 아이디입니다.'
     }
 
     if (
@@ -50,8 +86,7 @@ function SignupPage() {
       !/[0-9]/.test(form.password) ||
       !/[!@#$%^&*]/.test(form.password)
     ) {
-      newErrors.password =
-        '영문, 숫자, 특수문자 조합 8~20자로 입력해주세요.'
+      newErrors.password = '영문, 숫자, 특수문자 조합 8~20자로 입력해주세요.'
     }
 
     if (form.password !== form.passwordCheck) {
@@ -59,8 +94,7 @@ function SignupPage() {
     }
 
     if (form.nickname.length < 2 || form.nickname.length > 12) {
-      newErrors.nickname =
-        '닉네임은 2자 이상 12자 이하로 입력해주세요.'
+      newErrors.nickname = '닉네임은 2자 이상 12자 이하로 입력해주세요.'
     }
 
     setErrors(newErrors)
@@ -68,11 +102,95 @@ function SignupPage() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = (e) => {
+  const handleSendCode = async () => {
+    if (!validateEmailStep()) return
+
+    setIsSendingCode(true)
+    setStatusMessage('')
+
+    try {
+      const token = await sendSignupEmailToken({
+        email: form.email,
+      })
+
+      setEmailTokenUserId(token.userId)
+      setStatusMessage('인증번호를 이메일로 전송했습니다.')
+    } catch (error) {
+      setErrors((current) => ({
+        ...current,
+        email: toKoreanErrorMessage(error, '인증번호 전송에 실패했습니다.'),
+      }))
+    } finally {
+      setIsSendingCode(false)
+    }
+  }
+
+  const handleVerifyCode = async () => {
+    if (!emailTokenUserId) {
+      setErrors((current) => ({
+        ...current,
+        code: '먼저 인증번호를 전송해주세요.',
+      }))
+      return
+    }
+
+    if (form.code.length !== 6) {
+      setErrors((current) => ({
+        ...current,
+        code: '인증번호 6자리를 입력해주세요.',
+      }))
+      return
+    }
+
+    setIsVerifyingCode(true)
+    setStatusMessage('')
+
+    try {
+      await verifySignupEmailToken({
+        userId: emailTokenUserId,
+        secret: form.code,
+      })
+      setIsEmailVerified(true)
+      setStatusMessage('이메일 인증이 완료되었습니다.')
+    } catch (error) {
+      setErrors((current) => ({
+        ...current,
+        code: toKoreanErrorMessage(error, '인증번호 확인에 실패했습니다.'),
+      }))
+    } finally {
+      setIsVerifyingCode(false)
+    }
+  }
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
 
-    if (validate()) {
-      alert('회원가입 성공!')
+    if (!validate()) return
+
+    if (!isEmailVerified) {
+      setErrors((current) => ({
+        ...current,
+        code: '이메일 인증을 완료해주세요.',
+      }))
+      return
+    }
+
+    setIsSubmitting(true)
+    setStatusMessage('')
+
+    try {
+      await signUp({
+        email: form.email,
+        password: form.password,
+        username: form.userId,
+        nickname: form.nickname,
+      })
+      await logout().catch(() => {})
+      navigate('/login')
+    } catch (error) {
+      setStatusMessage(toKoreanErrorMessage(error, '회원가입에 실패했습니다.'))
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -103,7 +221,7 @@ function SignupPage() {
           <h1>회원가입</h1>
 
           <p className="desc">
-            학교 이메일 인증 후 서비스를 이용하세요
+            학교 이메일 인증 후 HUFS MAP 계정을 만들어주세요.
           </p>
 
           <form onSubmit={handleSubmit}>
@@ -125,8 +243,13 @@ function SignupPage() {
                 )}
               </div>
 
-              <button type="button" className="signup-small-btn">
-                전송
+              <button
+                type="button"
+                className="signup-small-btn"
+                onClick={handleSendCode}
+                disabled={isSendingCode}
+              >
+                {isSendingCode ? '전송 중' : '전송'}
               </button>
             </div>
 
@@ -148,111 +271,132 @@ function SignupPage() {
                 )}
               </div>
 
-              <button type="button" className="signup-small-btn">
-                확인
-              </button>
-            </div>
-
-            <div className="signup-form-row full">
-              <label>아이디</label>
-
-              <div className="signup-field">
-                <input
-                  className={errors.userId ? 'error-input' : ''}
-                  name="userId"
-                  type="text"
-                  placeholder="영문, 숫자 조합 4~20자"
-                  value={form.userId}
-                  onChange={handleChange}
-                />
-
-                {errors.userId && (
-                  <p className="field-error">{errors.userId}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="signup-form-row full">
-              <label>비밀번호</label>
-
-              <div className="signup-field">
-                <input
-                  className={errors.password ? 'error-input' : ''}
-                  name="password"
-                  type="password"
-                  placeholder="영문, 숫자, 특수문자 조합 8~20자"
-                  value={form.password}
-                  onChange={handleChange}
-                />
-
-                {errors.password && (
-                  <p className="field-error">{errors.password}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="signup-form-row full">
-              <label>비밀번호 확인</label>
-
-              <div className="signup-field">
-                <input
-                  className={errors.passwordCheck ? 'error-input' : ''}
-                  name="passwordCheck"
-                  type="password"
-                  placeholder="비밀번호를 다시 입력하세요"
-                  value={form.passwordCheck}
-                  onChange={handleChange}
-                />
-
-                {errors.passwordCheck && (
-                  <p className="field-error">
-                    {errors.passwordCheck}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div className="signup-form-row full">
-              <label>닉네임</label>
-
-              <div className="signup-field">
-                <input
-                  className={errors.nickname ? 'error-input' : ''}
-                  name="nickname"
-                  type="text"
-                  placeholder="닉네임을 입력하세요 (2~12자)"
-                  value={form.nickname}
-                  onChange={handleChange}
-                />
-
-                {errors.nickname && (
-                  <p className="field-error">{errors.nickname}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="signup-form-row full">
-              <label>프로필 사진</label>
-
               <button
                 type="button"
-                className="signup-upload-btn"
+                className="signup-small-btn"
+                onClick={handleVerifyCode}
+                disabled={isVerifyingCode}
               >
-                ＋ 프로필 사진 첨부
+                {isVerifyingCode ? '확인 중' : '확인'}
               </button>
             </div>
+
+            {isEmailVerified && (
+              <>
+                <div className="signup-form-row full">
+                  <label>아이디</label>
+
+                  <div className="signup-field">
+                    <input
+                      className={errors.userId ? 'error-input' : ''}
+                      name="userId"
+                      type="text"
+                      placeholder="영문, 숫자 조합 4~20자"
+                      value={form.userId}
+                      onChange={handleChange}
+                    />
+
+                    {errors.userId && (
+                      <p className="field-error">{errors.userId}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="signup-form-row full">
+                  <label>비밀번호</label>
+
+                  <div className="signup-field">
+                    <div className="password-input-wrap">
+                      <input
+                        className={errors.password ? 'error-input' : ''}
+                        name="password"
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="영문, 숫자, 특수문자 조합 8~20자"
+                        value={form.password}
+                        onChange={handleChange}
+                      />
+                      <PasswordToggleButton
+                        isVisible={showPassword}
+                        onClick={() => setShowPassword((isVisible) => !isVisible)}
+                      />
+                    </div>
+
+                    {errors.password && (
+                      <p className="field-error">{errors.password}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="signup-form-row full">
+                  <label>비밀번호 확인</label>
+
+                  <div className="signup-field">
+                    <div className="password-input-wrap">
+                      <input
+                        className={errors.passwordCheck ? 'error-input' : ''}
+                        name="passwordCheck"
+                        type={showPasswordCheck ? 'text' : 'password'}
+                        placeholder="비밀번호를 다시 입력하세요"
+                        value={form.passwordCheck}
+                        onChange={handleChange}
+                      />
+                      <PasswordToggleButton
+                        isVisible={showPasswordCheck}
+                        onClick={() =>
+                          setShowPasswordCheck((isVisible) => !isVisible)
+                        }
+                      />
+                    </div>
+
+                    {errors.passwordCheck && (
+                      <p className="field-error">
+                        {errors.passwordCheck}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="signup-form-row full">
+                  <label>닉네임</label>
+
+                  <div className="signup-field">
+                    <input
+                      className={errors.nickname ? 'error-input' : ''}
+                      name="nickname"
+                      type="text"
+                      placeholder="닉네임을 입력하세요 (2~12자)"
+                      value={form.nickname}
+                      onChange={handleChange}
+                    />
+
+                    {errors.nickname && (
+                      <p className="field-error">{errors.nickname}</p>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {statusMessage && (
+              <p className="field-error">{statusMessage}</p>
+            )}
 
             <button
               type="submit"
               className="signup-submit-btn"
+              disabled={isSubmitting || !isEmailVerified}
             >
-              회원가입
+              {isSubmitting
+                ? '가입 중...'
+                : isEmailVerified
+                  ? '회원가입'
+                  : '이메일 인증 후 가입'}
             </button>
           </form>
 
           <p className="login-link">
             이미 계정이 있으신가요?{' '}
-            <Link to="/">로그인</Link>
+            <Link to="/login">로그인</Link>
           </p>
         </section>
       </main>

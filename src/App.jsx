@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { BrowserRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 
 import Mainpage from "./pages/Mainpage.jsx";
@@ -9,6 +10,7 @@ import EditProfilePage from "./pages/EditProfilePage.jsx";
 import MyPostsPage from "./pages/MyPostsPage.jsx";
 import CommentPage from "./pages/CommentPage.jsx";
 import FavoritePage from "./pages/FavoritePage.jsx";
+import { getCurrentUser, logout } from "./services/auth.js";
 
 const MAIN_PAGE_BY_PATH = {
   "/": "main",
@@ -44,16 +46,47 @@ function MainExperience() {
   const location = useLocation();
   const navigate = useNavigate();
   const page = MAIN_PAGE_BY_PATH[location.pathname] || "main";
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const checkLogin = async () => {
+      const currentUser = await getCurrentUser();
+
+      if (isMounted) {
+        setIsLoggedIn(Boolean(currentUser));
+      }
+    };
+
+    checkLogin();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [location.pathname]);
+
+  const handleAuthAction = async () => {
+    if (isLoggedIn) {
+      await logout().catch(() => {});
+      setIsLoggedIn(false);
+      navigate("/login");
+      return;
+    }
+
+    navigate("/login");
+  };
 
   return (
     <Mainpage
+      authActionLabel={isLoggedIn ? "로그아웃" : "로그인/회원가입"}
       page={page}
       selectedBuildingName={location.state?.buildingName || ""}
       onOpenBoard={() => navigate("/post")}
       onOpenBuildings={() => navigate("/buildings")}
       onOpenFacilities={() => navigate("/facilities")}
       onOpenHome={() => navigate("/")}
-      onOpenLogin={() => navigate("/login")}
+      onOpenLogin={handleAuthAction}
       onOpenMap={(buildingName) => navigate("/map", { state: { buildingName } })}
       onOpenMyPage={() => navigate("/mypage")}
       onOpenCampusMap={() => navigate("/campus-map")}

@@ -1,20 +1,32 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import PasswordToggleButton from '../components/PasswordToggleButton'
+import { login } from '../services/auth'
+import { toKoreanErrorMessage } from '../services/errors'
 import './LoginPage.css'
 
 function LoginPage() {
-  const [error, setError] = useState(false)
-  const [id, setId] = useState('')
+  const navigate = useNavigate()
+  const [error, setError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [username, setUsername] = useState('')
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault()
+    setError('')
+    setIsSubmitting(true)
 
-    if (id === 'testuser' && password === '1234') {
-      setError(false)
-      alert('로그인 성공!')
-    } else {
-      setError(true)
+    try {
+      await login({ emailOrUsername: username, password })
+      navigate('/')
+    } catch (loginError) {
+      setError(
+        toKoreanErrorMessage(loginError, '아이디 또는 비밀번호가 올바르지 않습니다.'),
+      )
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -43,7 +55,7 @@ function LoginPage() {
 
           {error && (
             <p className="error-message">
-              ⓘ 아이디 또는 비밀번호가 올바르지 않습니다.
+              ⓘ {error}
             </p>
           )}
 
@@ -54,8 +66,8 @@ function LoginPage() {
               <input
                 type="text"
                 placeholder="아이디를 입력하세요"
-                value={id}
-                onChange={(e) => setId(e.target.value)}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
               />
             </div>
 
@@ -64,27 +76,25 @@ function LoginPage() {
 
               <div className="password-box">
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   placeholder="비밀번호를 입력하세요"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
 
-                <span>⊙</span>
+                <PasswordToggleButton
+                  isVisible={showPassword}
+                  onClick={() => setShowPassword((isVisible) => !isVisible)}
+                />
               </div>
             </div>
 
             <div className="form-options">
-              <label>
-                <input type="checkbox" />
-                아이디 저장
-              </label>
-
               <a href="#">비밀번호를 잊으셨나요?</a>
             </div>
 
             <button type="submit" className="login-btn">
-              로그인
+              {isSubmitting ? '로그인 중...' : '로그인'}
             </button>
           </form>
 
