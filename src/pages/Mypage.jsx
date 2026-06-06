@@ -51,6 +51,31 @@ function MyPage() {
     navigate('/login')
   }
 
+  const handleAccountLogout = async () => {
+    await logout().catch(() => {})
+    navigate('/login')
+  }
+
+  const handleDeleteAccount = async () => {
+    const confirmed = window.confirm(
+      '정말 탈퇴하시겠습니까? 계정 정보가 삭제되며 되돌릴 수 없습니다.',
+    )
+
+    if (!confirmed) return
+
+    setIsDeleting(true)
+
+    try {
+      await deleteCurrentUser(user.$id)
+      await logout().catch(() => {})
+      window.alert('회원 탈퇴가 완료되었습니다.')
+      navigate('/login')
+    } catch (error) {
+      window.alert(toKoreanErrorMessage(error, '회원 탈퇴를 처리하지 못했습니다.'))
+      setIsDeleting(false)
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="mypage">
@@ -72,7 +97,7 @@ function MyPage() {
         <Link to="/">메인페이지</Link>
         <Link to="/post">게시판</Link>
         <Link to="/mypage">마이페이지</Link>
-        <button className="nav-logout" type="button" onClick={handleLogout}>
+        <button className="nav-logout" type="button" onClick={handleAccountLogout}>
           로그아웃
         </button>
       </header>
@@ -170,7 +195,7 @@ function MyPage() {
           <button
             className="small-card danger leave-card"
             type="button"
-            onClick={handleLeaveRequest}
+            onClick={handleDeleteAccount}
             disabled={isDeleting}
           >
             <span>{isDeleting ? '탈퇴 처리 중' : '⚤ 탈퇴하기'}</span>

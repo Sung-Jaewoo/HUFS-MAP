@@ -4,7 +4,9 @@ import {
   Databases,
   Functions,
   ID,
+  Permission,
   Query,
+  Role,
   Storage,
   TablesDB,
 } from "appwrite";
@@ -37,6 +39,8 @@ export const APPWRITE_REPORT_COLLECTION_ID =
   import.meta.env.VITE_APPWRITE_REPORT_COLLECTION_ID || "repost";
 export const APPWRITE_BOARD_BUCKET_ID =
   import.meta.env.VITE_APPWRITE_BOARD_BUCKET_ID || "hufs-bucket";
+export const APPWRITE_DELETE_USER_FUNCTION_ID =
+  import.meta.env.VITE_APPWRITE_DELETE_USER_FUNCTION_ID || "delete-user";
 
 export const account = new Account(client);
 export const databases = new Databases(client);
@@ -45,4 +49,4 @@ export const tablesDB = new TablesDB(client);
 export const storage = new Storage(client);
 export const boardDatabases = new Databases(boardClient);
 export const boardStorage = new Storage(boardClient);
-export { boardClient, client, ID, Query };
+export { boardClient, client, ID, Permission, Query, Role };
