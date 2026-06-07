@@ -69,11 +69,36 @@ export async function logout() {
 }
 
 export async function deleteCurrentUser(userId) {
-  return functions.createExecution({
+  const execution = await functions.createExecution({
     functionId: APPWRITE_DELETE_USER_FUNCTION_ID,
     body: JSON.stringify({ userId }),
     async: false,
   });
+
+  const isSuccessfulStatus =
+    execution.responseStatusCode >= 200 && execution.responseStatusCode < 300;
+
+  if (execution.status === "failed" || !isSuccessfulStatus) {
+    const responseMessage = parseExecutionErrorMessage(execution.responseBody);
+    throw new Error(
+      responseMessage ||
+        execution.errors ||
+        "회원 탈퇴 Function 실행에 실패했습니다.",
+    );
+  }
+
+  return execution;
+}
+
+function parseExecutionErrorMessage(responseBody) {
+  if (!responseBody) return "";
+
+  try {
+    const parsedBody = JSON.parse(responseBody);
+    return parsedBody.message || parsedBody.error || "";
+  } catch {
+    return responseBody;
+  }
 }
 
 export async function getCurrentUser() {
