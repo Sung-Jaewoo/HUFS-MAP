@@ -310,7 +310,14 @@ button {
 }
 
 .postInfo strong {
+  min-width: 0;
+  display: -webkit-box;
+  overflow: hidden;
+  line-height: 1.28;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   font-weight: 800;
+  word-break: keep-all;
 }
 
 .postStats {

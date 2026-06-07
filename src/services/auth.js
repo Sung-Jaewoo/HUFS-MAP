@@ -1,8 +1,11 @@
 import {
   APPWRITE_DATABASE_ID,
+  APPWRITE_DELETE_USER_FUNCTION_ID,
   APPWRITE_USERS_TABLE_ID,
   ID,
+  Permission,
   Query,
+  Role,
   account,
   functions,
   tablesDB,
@@ -40,6 +43,11 @@ export async function signUp({ email, password, username, nickname }) {
       nickname,
       authUserId: user.$id,
     },
+    permissions: [
+      Permission.read(Role.user(user.$id)),
+      Permission.update(Role.user(user.$id)),
+      Permission.delete(Role.user(user.$id)),
+    ],
   });
 
   return user;
@@ -62,7 +70,7 @@ export async function logout() {
 
 export async function deleteCurrentUser(userId) {
   return functions.createExecution({
-    functionId: "delete-user",
+    functionId: APPWRITE_DELETE_USER_FUNCTION_ID,
     body: JSON.stringify({ userId }),
     async: false,
   });

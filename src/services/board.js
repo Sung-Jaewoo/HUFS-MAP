@@ -34,57 +34,57 @@ const BUILDING_DETAIL_BY_KEY = {
   baeknyeon: {
     category: "강의/학생지원",
     description: "학생 활동과 수업 공간이 함께 있는 건물입니다.",
-    image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72",
+    image: "/buildings/100nyeon.jpeg",
   },
   dormitory: {
     category: "생활",
     description: "학생들이 거주하는 기숙사 공간입니다.",
-    image: "https://images.unsplash.com/photo-1562774053-701939374585",
+    image: "/buildings/hufsdorm.jpeg",
   },
   engineering: {
     category: "강의/실험",
     description: "공학 계열 강의와 실험실이 있는 건물입니다.",
-    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab",
+    image: "/buildings/gonghak.jpeg",
   },
   humanities_economics: {
     category: "강의",
     description: "인문, 경상 계열 수업이 진행되는 건물입니다.",
-    image: "https://images.unsplash.com/photo-1497366811353-6870744d04b2",
+    image: "/buildings/kyungsangdae.jpeg",
   },
   language: {
     category: "강의",
     description: "어문 계열 수업과 학습 공간이 있는 건물입니다.",
-    image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1",
+    image: "/buildings/a-moon.jpeg",
   },
   library: {
     category: "도서관",
     description: "자료 열람과 학습을 위한 중앙도서관입니다.",
-    image: "https://images.unsplash.com/photo-1511818966892-d7d671e672a2",
+    image: "/buildings/hufslib.jpeg",
   },
   liberal_arts: {
     category: "강의",
     description: "교양 수업과 공통 강의가 진행되는 건물입니다.",
-    image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c",
+    image: "/buildings/gyoyang.jpeg",
   },
   myeongsudang: {
     category: "장소",
     description: "캠퍼스 안에서 위치를 확인할 수 있는 장소입니다.",
-    image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
+    image: "/buildings/100nyeon.jpeg",
   },
   natural_science: {
     category: "강의/실험",
     description: "자연과학 계열 강의와 실험 공간이 있는 건물입니다.",
-    image: "https://images.unsplash.com/photo-1532094349884-543bc11b234d",
+    image: "/buildings/jayeon.jpeg",
   },
   student_union: {
     category: "학생지원",
     description: "학생 복지와 편의 시설을 이용할 수 있는 건물입니다.",
-    image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644",
+    image: "/buildings/hakgwan.jpeg",
   },
   welfare: {
     category: "편의시설",
     description: "학생 편의 시설과 휴게 공간이 있는 건물입니다.",
-    image: "https://images.unsplash.com/photo-1518005020951-eccb494ad742",
+    image: "/buildings/husaeng.jpeg",
   },
 };
 
@@ -115,7 +115,7 @@ export async function listFavoriteBuildingCards({ userId }) {
         description: detail.description || `${label} 위치를 확인할 수 있습니다.`,
         image:
           detail.image ||
-          "https://images.unsplash.com/photo-1562774053-701939374585",
+          "/buildings/100nyeon.jpeg",
         name: label,
       };
     })
