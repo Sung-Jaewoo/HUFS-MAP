@@ -89,10 +89,6 @@ function LoginPage() {
               </div>
             </div>
 
-            <div className="form-options">
-              <a href="#">비밀번호를 잊으셨나요?</a>
-            </div>
-
             <button type="submit" className="login-btn">
               {isSubmitting ? '로그인 중...' : '로그인'}
             </button>

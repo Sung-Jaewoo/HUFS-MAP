@@ -140,15 +140,6 @@
   right: 9px;
 }
 
-.form-options {
-  margin: 10px 0 24px 90px;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  font-size: 12px;
-}
-
-.form-options a,
 .signup a {
   color: #6f4bea;
   text-decoration: none;
