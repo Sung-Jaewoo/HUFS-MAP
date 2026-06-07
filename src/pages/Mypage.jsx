@@ -30,7 +30,14 @@ function MyPage() {
     setIsDeleting(true)
 
     try {
-      await deleteCurrentUser(user.$id)
+      const execution = await deleteCurrentUser(user.$id)
+      console.info('delete-user execution', execution)
+
+      const remainingUser = await getCurrentUser()
+
+      if (remainingUser?.$id === user.$id) {
+        throw new Error('Auth user still exists after delete-user execution.')
+      }
       await logout().catch(() => {})
       window.alert('회원 탈퇴가 완료되었습니다.')
       navigate('/login')
@@ -66,7 +73,14 @@ function MyPage() {
     setIsDeleting(true)
 
     try {
-      await deleteCurrentUser(user.$id)
+      const execution = await deleteCurrentUser(user.$id)
+      console.info('delete-user execution', execution)
+
+      const remainingUser = await getCurrentUser()
+
+      if (remainingUser?.$id === user.$id) {
+        throw new Error('Auth user still exists after delete-user execution.')
+      }
       await logout().catch(() => {})
       window.alert('회원 탈퇴가 완료되었습니다.')
       navigate('/login')
