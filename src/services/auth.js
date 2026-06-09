@@ -73,6 +73,10 @@ export async function deleteCurrentUser(userId) {
     functionId: APPWRITE_DELETE_USER_FUNCTION_ID,
     body: JSON.stringify({ userId }),
     async: false,
+    headers: {
+      "Content-Type": "application/json",
+      "x-hufs-user-id": userId,
+    },
   });
 
   const isSuccessfulStatus =
